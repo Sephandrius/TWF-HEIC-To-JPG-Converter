@@ -115,6 +115,15 @@
       border-color: var(--hardhat);
     }
     
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .file-input,
     .folder-input {
       display: none;
     }
@@ -123,7 +132,7 @@
       background-color: var(--hardhat);
       color: var(--4am);
       border: none;
-      padding: 12px 24px;
+      padding: 12px 16px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
@@ -132,6 +141,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      min-width: 120px;
     }
     
     .upload-button:hover {
@@ -306,9 +316,13 @@
   
   <div class="container">
     <div id="drop-area" class="drop-area">
-      <p>Drag & drop a folder containing HEIC files here or</p>
-      <input type="file" id="folder-input" class="folder-input" webkitdirectory directory multiple>
-      <button class="upload-button" onclick="document.getElementById('folder-input').click()">Select Folder</button>
+      <p>Drag & drop HEIC files or a folder containing HEIC files here</p>
+      <div class="button-group">
+        <input type="file" id="file-input" class="file-input" accept=".heic,.HEIC" multiple>
+        <input type="file" id="folder-input" class="folder-input" webkitdirectory directory multiple>
+        <button class="upload-button" onclick="document.getElementById('file-input').click()">Select Files</button>
+        <button class="upload-button" onclick="document.getElementById('folder-input').click()">Select Folder</button>
+      </div>
     </div>
     
     <div id="file-list" class="file-list" style="display: none;"></div>
@@ -530,19 +544,19 @@
       
       const folderHeading = document.createElement('div');
       folderHeading.className = 'folder-name';
-      folderHeading.textContent = `Source Folder: ${folderName}`;
+      folderHeading.textContent = folderName;
       fileList.appendChild(folderHeading);
       
       // Note about output structure
       const outputNote = document.createElement('div');
       outputNote.style.margin = '10px 0';
       outputNote.style.fontSize = '14px';
-      outputNote.style.color = '#666';
+      outputNote.style.color = '#BBBBBB';
       outputNote.textContent = 'All files will be placed in the root of the ZIP (no folders):';
       fileList.appendChild(outputNote);
       
       // Display all files in a flat list
-      folderFiles.forEach(fileInfo => {
+      folderFiles.forEach((fileInfo, index) => {
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
         
@@ -556,11 +570,20 @@
         
         // Show original path and output name
         fileItem.innerHTML = `
-          <div><small>Original: ${fileInfo.path ? fileInfo.path + '/' : ''}${fileInfo.file.name}</small></div>
-          <div>Output: ${outputName} (${formatFileSize(fileInfo.file.size)})</div>
+          <div><small>${fileInfo.path ? fileInfo.path + '/' : ''}${fileInfo.file.name}</small></div>
+          <div>${outputName} (${formatFileSize(fileInfo.file.size)})
+            <span style="float: right; cursor: pointer; color: #BA6E4D;" 
+                  onclick="removeFile(${index})">✕</span>
+          </div>
         `;
         fileList.appendChild(fileItem);
       });
+    }
+    
+    function removeFile(index) {
+      folderFiles.splice(index, 1);
+      updateFileList();
+      convertBtn.disabled = folderFiles.length === 0;
     }
     
     function formatFileSize(bytes) {
