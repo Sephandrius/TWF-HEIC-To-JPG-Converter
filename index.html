@@ -5,42 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>T.W. FRIERSON HEIC Converter</title>
   
-  <!-- Add responsive styling -->
-  <style>
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      body {
-        padding: 15px;
-      }
-      
-      .container {
-        padding: 20px;
-      }
-      
-      .drop-area {
-        padding: 30px 15px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 24px;
-      }
-      
-      .tagline {
-        font-size: 14px;
-      }
-      
-      .upload-button, .convert-button {
-        padding: 10px 16px;
-        font-size: 14px;
-      }
-      
-      .convert-button {
-        max-width: 220px;
-      }
-    }
-  </style>
+  <!-- Responsive styling -->
   <style>
     :root {
       /* T.W. Frierson brand colors from the guide */
@@ -276,20 +241,6 @@
       font-size: 14px;
     }
     
-    .twf-logo {
-      text-align: center;
-      margin-bottom: 20px;
-      display: none; /* Hide the logo */
-    }
-    
-    .footer {
-      margin-top: 30px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-secondary);
-      display: none; /* Hide the footer */
-    }
-    
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
@@ -307,6 +258,40 @@
     
     ::-webkit-scrollbar-thumb:hover {
       background: #555555;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      .drop-area {
+        padding: 30px 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+      
+      .tagline {
+        font-size: 14px;
+      }
+      
+      .upload-button, .convert-button {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      
+      .convert-button {
+        max-width: 220px;
+      }
     }
   </style>
 </head>
@@ -342,7 +327,6 @@
       <p>Created for T.W. Frierson by Joseph Winters.</p>
     </div>
   </div>
-</body>
 
   <!-- Load required libraries from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -350,18 +334,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
   <script>
-    // Files storage with path information
-    let folderFiles = [];
-    let folderName = "";
+    // Files storage
+    let files = [];
+    let sourceName = "";
     
     // Elements
     const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
     const folderInput = document.getElementById('folder-input');
     const fileList = document.getElementById('file-list');
     const convertBtn = document.getElementById('convert-btn');
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress');
     const statusText = document.getElementById('status');
+    
+    // -------- Event listeners --------
     
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -378,14 +365,19 @@
       dropArea.addEventListener(eventName, unhighlight, false);
     });
     
-    // Handle dropped folders
+    // Handle dropped files/folders
     dropArea.addEventListener('drop', handleDrop, false);
+    
+    // Handle selected files
+    fileInput.addEventListener('change', handleFiles, false);
     
     // Handle selected folders
     folderInput.addEventListener('change', handleFolder, false);
     
     // Convert button event
     convertBtn.addEventListener('click', convertFiles, false);
+    
+    // -------- Utility functions --------
     
     function preventDefaults(e) {
       e.preventDefault();
@@ -400,102 +392,80 @@
       dropArea.classList.remove('highlight');
     }
     
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // -------- File handling functions --------
+    
+    // Handle drag and drop
     function handleDrop(e) {
       const dt = e.dataTransfer;
-      const items = dt.items;
       
-      // Check if any folders were dropped
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.kind === 'file' && item.webkitGetAsEntry) {
-          const entry = item.webkitGetAsEntry();
-          if (entry.isDirectory) {
-            processDirectory(entry);
-            return;
+      // Check for folders first
+      if (dt.items) {
+        const items = dt.items;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.kind === 'file' && item.webkitGetAsEntry) {
+            const entry = item.webkitGetAsEntry();
+            if (entry && entry.isDirectory) {
+              processDirectory(entry);
+              return;
+            }
           }
         }
       }
       
       // If no folders, process as regular files
-      const files = dt.files;
-      handleFolder({ target: { files } });
+      const droppedFiles = dt.files;
+      handleFiles({ target: { files: droppedFiles } });
     }
     
-    async function processDirectory(directoryEntry) {
-      folderName = directoryEntry.name;
-      folderFiles = [];
-      
-      const reader = directoryEntry.createReader();
-      readAllDirectoryEntries(reader, []).then(entries => {
-        // Process all entries recursively, starting with an empty base path
-        // The second parameter is the base path, empty string means root directory
-        processEntries(entries, "").then(files => {
-          if (files.length === 0) {
-            alert('No HEIC files found in the folder.');
-            return;
-          }
-          
-          folderFiles = files;
-          updateFileList();
-          
-          // Enable convert button
-          convertBtn.disabled = folderFiles.length === 0;
-        });
-      });
-    }
-    
-    async function readAllDirectoryEntries(directoryReader, result) {
-      let entries = await readEntriesPromise(directoryReader);
-      if (entries.length) {
-        result = result.concat(entries);
-        return readAllDirectoryEntries(directoryReader, result);
-      }
-      return result;
-    }
-    
-    function readEntriesPromise(directoryReader) {
-      return new Promise((resolve, reject) => {
-        directoryReader.readEntries(resolve, reject);
-      });
-    }
-    
-    async function processEntries(entries, path) {
-      const files = [];
-      
-      for (const entry of entries) {
-        if (entry.isFile) {
-          if (entry.name.toLowerCase().endsWith('.heic')) {
-            const file = await getFileFromEntry(entry);
-            // Store the file with the path, but exclude the root folder name
-            files.push({
-              file: file,
-              path: path, // This is the folder path without the root folder name
-              fullPath: path ? path + '/' + file.name : file.name // This is the full path without the root folder name
-            });
-          }
-        } else if (entry.isDirectory) {
-          const directoryReader = entry.createReader();
-          const subEntries = await readAllDirectoryEntries(directoryReader, []);
-          const newPath = path ? path + '/' + entry.name : entry.name;
-          const subFiles = await processEntries(subEntries, newPath);
-          files.push(...subFiles);
-        }
-      }
-      
-      return files;
-    }
-    
-    function getFileFromEntry(fileEntry) {
-      return new Promise((resolve, reject) => {
-        fileEntry.file(resolve, reject);
-      });
-    }
-    
-    async function handleFolder(e) {
-      const files = Array.from(e.target.files);
+    // Process individual files
+    function handleFiles(e) {
+      const inputFiles = e.target.files;
       
       // Filter only HEIC files
-      const heicFiles = files.filter(file => 
+      const heicFiles = Array.from(inputFiles).filter(file => 
+        file.name.toLowerCase().endsWith('.heic')
+      );
+      
+      if (heicFiles.length === 0) {
+        alert('Please select HEIC files only.');
+        return;
+      }
+      
+      // Store files with metadata
+      sourceName = "Selected Files";
+      files = heicFiles.map(file => {
+        return {
+          file: file,
+          path: "", // No path for individual files
+          fullPath: file.name,
+          // Generate a unique ID for this file
+          id: Math.random().toString(36).substring(2, 11)
+        };
+      });
+      
+      updateFileList();
+      
+      // Enable convert button
+      convertBtn.disabled = files.length === 0;
+    }
+    
+    // Process folder selection
+    async function handleFolder(e) {
+      const inputFiles = e.target.files;
+      
+      // Filter only HEIC files
+      const heicFiles = Array.from(inputFiles).filter(file => 
         file.name.toLowerCase().endsWith('.heic')
       );
       
@@ -506,10 +476,10 @@
       
       // Get folder name from the path of the first file
       const pathParts = heicFiles[0].webkitRelativePath.split('/');
-      folderName = pathParts[0];
+      sourceName = pathParts[0];
       
       // Store files with their relative paths
-      folderFiles = heicFiles.map(file => {
+      files = heicFiles.map(file => {
         // Get the path excluding the root folder and filename
         const fullPath = file.webkitRelativePath;
         const pathParts = fullPath.split('/');
@@ -523,18 +493,108 @@
         return {
           file: file,
           path: relativePath,
-          fullPath: pathParts.join('/') // This no longer includes the root folder
+          fullPath: pathParts.join('/'), // This no longer includes the root folder
+          // Generate a unique ID for this file
+          id: Math.random().toString(36).substring(2, 11)
         };
       });
       
       updateFileList();
       
       // Enable convert button
-      convertBtn.disabled = folderFiles.length === 0;
+      convertBtn.disabled = files.length === 0;
     }
     
+    // Process directories (for drag & drop)
+    async function processDirectory(directoryEntry) {
+      sourceName = directoryEntry.name;
+      files = [];
+      
+      try {
+        const entries = await readDirectoryEntries(directoryEntry);
+        const heicFiles = await processEntries(entries, "");
+        
+        if (heicFiles.length === 0) {
+          alert('No HEIC files found in the folder.');
+          return;
+        }
+        
+        files = heicFiles;
+        updateFileList();
+        
+        // Enable convert button
+        convertBtn.disabled = files.length === 0;
+      } catch (error) {
+        console.error("Error processing directory:", error);
+        alert('Error reading folder: ' + error.message);
+      }
+    }
+    
+    // Read all entries in a directory recursively
+    async function readDirectoryEntries(directoryEntry) {
+      const directoryReader = directoryEntry.createReader();
+      let entries = [];
+      let readEntries = await readEntriesBatch(directoryReader);
+      
+      while (readEntries.length > 0) {
+        entries = entries.concat(readEntries);
+        readEntries = await readEntriesBatch(directoryReader);
+      }
+      
+      return entries;
+    }
+    
+    // Read a batch of entries from a directory reader
+    function readEntriesBatch(directoryReader) {
+      return new Promise((resolve, reject) => {
+        directoryReader.readEntries(resolve, reject);
+      });
+    }
+    
+    // Process entries recursively
+    async function processEntries(entries, path) {
+      const files = [];
+      
+      for (const entry of entries) {
+        if (entry.isFile) {
+          if (entry.name.toLowerCase().endsWith('.heic')) {
+            try {
+              const file = await getFileFromEntry(entry);
+              files.push({
+                file: file,
+                path: path, // Path without the root folder name
+                fullPath: path ? path + '/' + file.name : file.name,
+                id: Math.random().toString(36).substring(2, 11)
+              });
+            } catch (error) {
+              console.error(`Error getting file ${entry.name}:`, error);
+            }
+          }
+        } else if (entry.isDirectory) {
+          try {
+            const subEntries = await readDirectoryEntries(entry);
+            const newPath = path ? path + '/' + entry.name : entry.name;
+            const subFiles = await processEntries(subEntries, newPath);
+            files.push(...subFiles);
+          } catch (error) {
+            console.error(`Error processing directory ${entry.name}:`, error);
+          }
+        }
+      }
+      
+      return files;
+    }
+    
+    // Get file from FileEntry
+    function getFileFromEntry(fileEntry) {
+      return new Promise((resolve, reject) => {
+        fileEntry.file(resolve, reject);
+      });
+    }
+    
+    // Update the file list display
     function updateFileList() {
-      if (folderFiles.length === 0) {
+      if (files.length === 0) {
         fileList.style.display = 'none';
         return;
       }
@@ -542,21 +602,21 @@
       fileList.style.display = 'block';
       fileList.innerHTML = '';
       
-      const folderHeading = document.createElement('div');
-      folderHeading.className = 'folder-name';
-      folderHeading.textContent = folderName;
-      fileList.appendChild(folderHeading);
+      const titleElement = document.createElement('div');
+      titleElement.className = 'folder-name';
+      titleElement.textContent = sourceName;
+      fileList.appendChild(titleElement);
       
       // Note about output structure
       const outputNote = document.createElement('div');
       outputNote.style.margin = '10px 0';
       outputNote.style.fontSize = '14px';
-      outputNote.style.color = '#BBBBBB';
+      outputNote.style.color = var(--text-secondary);
       outputNote.textContent = 'All files will be placed in the root of the ZIP (no folders):';
       fileList.appendChild(outputNote);
       
       // Display all files in a flat list
-      folderFiles.forEach((fileInfo, index) => {
+      files.forEach((fileInfo) => {
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
         
@@ -565,39 +625,33 @@
         if (fileInfo.path) {
           const pathParts = fileInfo.path.split('/');
           const lastFolder = pathParts[pathParts.length - 1];
-          outputName = lastFolder + '_' + outputName;
+          outputName = lastFolder ? lastFolder + '_' + outputName : outputName;
         }
         
         // Show original path and output name
         fileItem.innerHTML = `
           <div><small>${fileInfo.path ? fileInfo.path + '/' : ''}${fileInfo.file.name}</small></div>
           <div>${outputName} (${formatFileSize(fileInfo.file.size)})
-            <span style="float: right; cursor: pointer; color: #BA6E4D;" 
-                  onclick="removeFile(${index})">✕</span>
+            <span style="float: right; cursor: pointer; color: var(--brick);" 
+                  onclick="removeFile('${fileInfo.id}')">✕</span>
           </div>
         `;
         fileList.appendChild(fileItem);
       });
     }
     
-    function removeFile(index) {
-      folderFiles.splice(index, 1);
+    // Remove a file from the list
+    function removeFile(fileId) {
+      files = files.filter(file => file.id !== fileId);
       updateFileList();
-      convertBtn.disabled = folderFiles.length === 0;
+      convertBtn.disabled = files.length === 0;
     }
     
-    function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+    // -------- Conversion functions --------
     
+    // Convert files to JPG and create a ZIP
     async function convertFiles() {
-      if (folderFiles.length === 0) return;
+      if (files.length === 0) return;
       
       // Show progress
       progressContainer.style.display = 'block';
@@ -611,11 +665,12 @@
         
         // Process each file
         let processed = 0;
-        let totalFiles = folderFiles.length;
+        let totalFiles = files.length;
         
-        for (const fileInfo of folderFiles) {
+        for (const fileInfo of files) {
           // Update status
-          statusText.textContent = `Converting ${++processed} of ${totalFiles}: ${fileInfo.file.name}`;
+          processed++;
+          statusText.textContent = `Converting ${processed} of ${totalFiles}: ${fileInfo.file.name}`;
           progressBar.style.width = `${(processed / totalFiles) * 90}%`;
           
           try {
@@ -626,28 +681,24 @@
               quality: 0.9
             });
             
-            // Add files directly to the root of the ZIP with just their names
-            // Extract just the filename without any path
-            const originalFilename = fileInfo.file.name;
+            // Get file name without extension and add jpg extension
+            let outputName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
             
-            // If there are multiple files with the same name in different folders,
-            // prefix them with part of their path to avoid overwriting
-            let uniqueFilename = originalFilename;
+            // Add folder prefix if from a subfolder
             if (fileInfo.path) {
-              // Create a simplified path for filename uniqueness
               const pathParts = fileInfo.path.split('/');
               const lastFolder = pathParts[pathParts.length - 1];
-              uniqueFilename = lastFolder + '_' + originalFilename;
+              if (lastFolder) {
+                outputName = lastFolder + '_' + outputName;
+              }
             }
             
-            // Replace HEIC extension with JPG
-            const jpgFilename = uniqueFilename.replace(/\.heic$/i, '.jpg');
-            
-            // Add to zip without any folder structure
-            zip.file(jpgFilename, jpegBlob);
+            // Add to zip
+            zip.file(outputName, jpegBlob);
           } catch (err) {
             console.error(`Error converting ${fileInfo.file.name}:`, err);
-            // Continue with other files
+            statusText.textContent = `Error with ${fileInfo.file.name}: ${err.message || 'Conversion failed'}`;
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Show error briefly before continuing
           }
         }
         
@@ -665,7 +716,7 @@
         });
         
         // Save the ZIP file using FileSaver.js
-        saveAs(zipBlob, `converted_images.zip`);
+        saveAs(zipBlob, 'converted_images.zip');
         
         // Update status
         statusText.textContent = 'Conversion completed!';
