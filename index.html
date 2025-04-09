@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TWF HEIC To JPG Utility</title>
+  <title>T.W. FRIERSON HEIC Converter</title>
   
-  <!-- Responsive styling -->
   <style>
     :root {
       /* T.W. Frierson brand colors from the guide */
@@ -411,7 +410,7 @@
       <h4>Tips for Success</h4>
       <div class="note">
         <p><strong>Note:</strong> If you're working with a large number of files, the conversion might take a few minutes. Please be patient and don't close the browser window during conversion.</p>
-        <p>For folders with many non-HEIC files, the tool will preserve all original files in their original locations and only convert the HEIC images to JPG format.</p>
+        <p>For folders with many non-HEIC files, the tool will preserve all original files in their original locations and only convert the HEIC images to JPG format. Common system files like thumbs.db and .DS_Store will be automatically excluded.</p>
       </div>
       
       <h4>Troubleshooting</h4>
@@ -461,7 +460,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
   <script>
-    // Make toggleTraining available globally
+    // Make the toggle function available in global scope
     window.toggleTraining = function() {
       const content = document.getElementById('training-content');
       const arrow = document.getElementById('training-arrow');
@@ -471,10 +470,20 @@
       }
     };
     
+    // Make removeFile accessible in the global scope
+    window.removeFile = function(fileId) {
+      if (window.filesList) {
+        window.filesList = window.filesList.filter(file => file.id !== fileId);
+        updateFileList();
+        document.getElementById('convert-btn').disabled = window.filesList.length === 0;
+      }
+    };
+    
+    // Wait until the DOM is fully loaded before initializing
     document.addEventListener('DOMContentLoaded', function() {
-      // Files storage
-      let files = [];
-      let sourceName = "";
+      // Files storage - using window object to ensure global scope
+      window.filesList = [];
+      window.sourceName = "";
       
       // Elements
       const dropArea = document.getElementById('drop-area');
@@ -485,6 +494,17 @@
       const progressContainer = document.getElementById('progress-container');
       const progressBar = document.getElementById('progress');
       const statusText = document.getElementById('status');
+      
+      // Helper function to detect system files
+      function isSystemFile(filename) {
+        if (!filename) return false;
+        const lowerName = filename.toLowerCase();
+        return lowerName === 'thumbs.db' || 
+               lowerName === 'desktop.ini' || 
+               lowerName === '.ds_store' ||
+               lowerName.startsWith('~$') ||  // Temporary Office files
+               lowerName.startsWith('._');    // macOS resource fork files
+      }
       
       // -------- Event listeners --------
       
@@ -580,7 +600,7 @@
         
         // Filter only HEIC files
         const heicFiles = Array.from(inputFiles).filter(file => 
-          file.name.toLowerCase().endsWith('.heic')
+          file.name && file.name.toLowerCase().endsWith('.heic')
         );
         
         if (heicFiles.length === 0) {
@@ -589,8 +609,8 @@
         }
         
         // Store files with metadata
-        sourceName = "Selected Files";
-        files = heicFiles.map(file => {
+        window.sourceName = "Selected Files";
+        window.filesList = heicFiles.map(file => {
           return {
             file: file,
             path: "", // No path for individual files
@@ -604,7 +624,7 @@
         updateFileList();
         
         // Enable convert button
-        convertBtn.disabled = files.length === 0;
+        convertBtn.disabled = window.filesList.length === 0;
       }
       
       // Process folder selection
@@ -617,32 +637,35 @@
         
         // Get folder name from the path of the first file
         const pathParts = inputFiles[0].webkitRelativePath.split('/');
-        sourceName = pathParts[0];
+        window.sourceName = pathParts[0];
         
         // Store ALL files with their relative paths (not just HEIC files)
-        files = Array.from(inputFiles).map(file => {
-          // Get the path excluding the root folder and filename
-          const fullPath = file.webkitRelativePath;
-          const pathParts = fullPath.split('/');
-          pathParts.shift(); // Remove the root folder name
-          
-          // If there's just one part left, it's a file directly in the root
-          const relativePath = pathParts.length > 1 ? 
-            pathParts.slice(0, -1).join('/') : 
-            '';
-          
-          return {
-            file: file,
-            path: relativePath,
-            fullPath: pathParts.join('/'), // This no longer includes the root folder
-            isHeic: file.name.toLowerCase().endsWith('.heic'),
-            // Generate a unique ID for this file
-            id: Math.random().toString(36).substring(2, 11)
-          };
-        });
+        // But exclude system files like thumbs.db
+        window.filesList = Array.from(inputFiles)
+          .filter(file => file && file.name && !isSystemFile(file.name))
+          .map(file => {
+            // Get the path excluding the root folder and filename
+            const fullPath = file.webkitRelativePath;
+            const pathParts = fullPath.split('/');
+            pathParts.shift(); // Remove the root folder name
+            
+            // If there's just one part left, it's a file directly in the root
+            const relativePath = pathParts.length > 1 ? 
+              pathParts.slice(0, -1).join('/') : 
+              '';
+            
+            return {
+              file: file,
+              path: relativePath,
+              fullPath: pathParts.join('/'), // This no longer includes the root folder
+              isHeic: file.name.toLowerCase().endsWith('.heic'),
+              // Generate a unique ID for this file
+              id: Math.random().toString(36).substring(2, 11)
+            };
+          });
         
         // Check if we have any HEIC files
-        const hasHeicFiles = files.some(fileInfo => fileInfo.isHeic);
+        const hasHeicFiles = window.filesList.some(fileInfo => fileInfo.isHeic);
         
         if (!hasHeicFiles) {
           alert('No HEIC files found in the selected folder. All other files will still be included in the output.');
@@ -651,13 +674,13 @@
         updateFileList();
         
         // Enable convert button if we have any files
-        convertBtn.disabled = files.length === 0;
+        convertBtn.disabled = window.filesList.length === 0;
       }
       
       // Process directories (for drag & drop)
       async function processDirectory(directoryEntry) {
-        sourceName = directoryEntry.name;
-        files = [];
+        window.sourceName = directoryEntry.name;
+        window.filesList = [];
         
         try {
           const entries = await readDirectoryEntries(directoryEntry);
@@ -670,11 +693,11 @@
             alert('No HEIC files found in the folder. All other files will still be included in the output.');
           }
           
-          files = allFiles;
+          window.filesList = allFiles;
           updateFileList();
           
           // Enable convert button if we have any files
-          convertBtn.disabled = files.length === 0;
+          convertBtn.disabled = window.filesList.length === 0;
         } catch (error) {
           console.error("Error processing directory:", error);
           alert('Error reading folder: ' + error.message);
@@ -707,20 +730,27 @@
         const results = [];
         
         for (const entry of entries) {
-          if (entry.isFile) {
+          if (entry && entry.isFile) {
             try {
+              // Skip system files
+              if (entry.name && isSystemFile(entry.name)) {
+                continue;
+              }
+              
               const file = await getFileFromEntry(entry);
-              results.push({
-                file: file,
-                path: path, // Path without the root folder name
-                fullPath: path ? path + '/' + file.name : file.name,
-                isHeic: file.name.toLowerCase().endsWith('.heic'),
-                id: Math.random().toString(36).substring(2, 11)
-              });
+              if (file) {
+                results.push({
+                  file: file,
+                  path: path, // Path without the root folder name
+                  fullPath: path ? path + '/' + file.name : file.name,
+                  isHeic: file.name.toLowerCase().endsWith('.heic'),
+                  id: Math.random().toString(36).substring(2, 11)
+                });
+              }
             } catch (error) {
               console.error(`Error getting file ${entry.name}:`, error);
             }
-          } else if (entry.isDirectory) {
+          } else if (entry && entry.isDirectory) {
             try {
               const subEntries = await readDirectoryEntries(entry);
               const newPath = path ? path + '/' + entry.name : entry.name;
@@ -744,7 +774,7 @@
       
       // Update the file list display
       function updateFileList() {
-        if (files.length === 0) {
+        if (window.filesList.length === 0) {
           fileList.style.display = 'none';
           return;
         }
@@ -754,7 +784,7 @@
         
         const titleElement = document.createElement('div');
         titleElement.className = 'folder-name';
-        titleElement.textContent = sourceName;
+        titleElement.textContent = window.sourceName;
         fileList.appendChild(titleElement);
         
         // Note about output structure
@@ -767,7 +797,7 @@
         
         // Group files by path
         const pathGroups = {};
-        files.forEach(fileInfo => {
+        window.filesList.forEach(fileInfo => {
           const path = fileInfo.path || '(root)';
           if (!pathGroups[path]) {
             pathGroups[path] = [];
@@ -819,7 +849,7 @@
       
       // Convert files to JPG and create a ZIP
       async function convertFiles() {
-        if (files.length === 0) return;
+        if (window.filesList.length === 0) return;
         
         // Show progress
         progressContainer.style.display = 'block';
@@ -833,15 +863,15 @@
           
           // Set appropriate name for the ZIP
           let zipName = 'converted_images.zip';
-          if (sourceName && sourceName !== "Selected Files") {
-            zipName = `${sourceName}_converted.zip`;
+          if (window.sourceName && window.sourceName !== "Selected Files") {
+            zipName = `${window.sourceName}_converted.zip`;
           }
           
           // Process each file
           let processed = 0;
-          let totalFiles = files.length;
+          let totalFiles = window.filesList.length;
           
-          for (const fileInfo of files) {
+          for (const fileInfo of window.filesList) {
             // Update status
             processed++;
             statusText.textContent = `Processing ${processed} of ${totalFiles}: ${fileInfo.file.name}`;
@@ -908,13 +938,6 @@
           convertBtn.disabled = false;
         }
       }
-      
-      // Make removeFile accessible in the global scope
-      window.removeFile = function(fileId) {
-        files = files.filter(file => file.id !== fileId);
-        updateFileList();
-        convertBtn.disabled = files.length === 0;
-      };
     });
   </script>
 </body>
