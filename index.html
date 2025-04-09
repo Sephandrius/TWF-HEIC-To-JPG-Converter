@@ -425,7 +425,6 @@
       try {
         // Create a new JSZip instance
         const zip = new JSZip();
-        const rootFolder = zip.folder(folderName + "_converted");
         
         // Process each file
         let processed = 0;
@@ -444,18 +443,25 @@
               quality: 0.9
             });
             
-            // Get file name without extension
+            // Get file name without extension and add jpg extension
             const fileName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
             
-            // Get relative path within the folder structure
-            const relativePath = fileInfo.fullPath.substring(
-              fileInfo.fullPath.indexOf('/')
-            ).replace(/^\//, '');
+            // Extract path relative to the root folder
+            // This removes the initial folder name to avoid nested folders when extracting
+            let relativePath = '';
+            const pathParts = fileInfo.fullPath.split('/');
             
-            const outputPath = relativePath.replace(/\.heic$/i, '.jpg');
+            if (pathParts.length > 1) {
+              // Skip the first part (root folder name) and build the path
+              pathParts.shift(); // Remove the root folder name
+              relativePath = pathParts.join('/').replace(/\.heic$/i, '.jpg');
+            } else {
+              // If there's no slash, this is a file directly in the root
+              relativePath = fileName;
+            }
             
-            // Add to zip with the correct path
-            rootFolder.file(outputPath, jpegBlob);
+            // Add to zip without creating an extra root folder
+            zip.file(relativePath, jpegBlob);
           } catch (err) {
             console.error(`Error converting ${fileInfo.file.name}:`, err);
             // Continue with other files
@@ -476,7 +482,7 @@
         });
         
         // Save the ZIP file using FileSaver.js
-        saveAs(zipBlob, `${folderName}_converted.zip`);
+        saveAs(zipBlob, `converted_images.zip`);
         
         // Update status
         statusText.textContent = 'Conversion completed!';
