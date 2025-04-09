@@ -3,43 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HEIC to JPG Folder Converter</title>
+  <title>T.W. FRIERSON HEIC Converter</title>
   <style>
+    :root {
+      /* T.W. Frierson brand colors from the guide */
+      --4am: #333333; /* Black/4AM */
+      --hardhat: #EBC42E; /* Yellow/HARDHAT */
+      --blue-collar: #30526E; /* Blue/BLUE COLLAR */
+      --brick: #BA6E4D; /* Brick color */
+      --concrete: #D1CCC7; /* Concrete color */
+      --reflector: #FAF7F5; /* White/REFLECTOR */
+      
+      /* Dark mode adaptations of the brand colors */
+      --dark-bg: #1F1F1F;
+      --darker-bg: #151515;
+      --lighter-bg: #2A2A2A;
+      --border-color: #444444;
+      --text-color: var(--reflector);
+      --text-secondary: #BBBBBB;
+    }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      max-width: 800px;
+      font-family: 'Franklin Gothic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+      max-width: 850px;
       margin: 0 auto;
-      padding: 20px;
-      color: #333;
+      padding: 30px;
+      color: var(--text-color);
       line-height: 1.6;
+      background-color: var(--darker-bg);
     }
     
     h1 {
       text-align: center;
+      margin-bottom: 10px;
+      color: var(--hardhat);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .tagline {
+      text-align: center;
+      color: var(--text-secondary);
       margin-bottom: 30px;
-      color: #2c3e50;
+      font-size: 16px;
     }
     
     .container {
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background-color: var(--dark-bg);
+      border-radius: 6px;
+      padding: 35px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
     }
     
     .drop-area {
-      border: 2px dashed #3498db;
-      border-radius: 5px;
-      padding: 40px 20px;
+      border: 2px dashed var(--hardhat);
+      border-radius: 6px;
+      padding: 40px 25px;
       text-align: center;
-      margin-bottom: 20px;
-      background-color: #f0f8ff;
+      margin-bottom: 25px;
+      background-color: var(--lighter-bg);
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s ease;
+    }
+    
+    .drop-area:hover {
+      background-color: #252525;
+      border-color: var(--hardhat);
     }
     
     .drop-area.highlight {
-      background-color: #d6eaf8;
+      background-color: #222222;
+      border-color: var(--hardhat);
     }
     
     .folder-input {
@@ -47,108 +83,188 @@
     }
     
     .upload-button {
-      background-color: #3498db;
-      color: white;
+      background-color: var(--hardhat);
+      color: var(--4am);
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 12px 24px;
+      border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .upload-button:hover {
-      background-color: #2980b9;
+      background-color: #D9B52A;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
     }
     
     .convert-button {
       display: block;
-      background-color: #2ecc71;
-      color: white;
+      background-color: var(--blue-collar);
+      color: var(--reflector);
       border: none;
-      padding: 12px 24px;
-      border-radius: 5px;
+      padding: 14px 28px;
+      border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-      margin: 20px auto;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      margin: 25px auto;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      width: 200px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .convert-button:hover {
-      background-color: #27ae60;
+      background-color: #3A6082;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
     }
     
     .convert-button:disabled {
-      background-color: #95a5a6;
+      background-color: #444444;
+      color: #999999;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     
     .progress-container {
-      margin-top: 20px;
+      margin-top: 25px;
       display: none;
     }
     
     .progress-bar {
       height: 10px;
-      background-color: #ecf0f1;
+      background-color: #333333;
       border-radius: 5px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       overflow: hidden;
     }
     
     .progress {
       height: 100%;
-      background-color: #3498db;
+      background-color: var(--hardhat);
       width: 0%;
       transition: width 0.3s;
+      border-radius: 5px;
     }
     
     .status {
       font-size: 14px;
-      color: #7f8c8d;
+      color: var(--text-secondary);
       text-align: center;
     }
     
     .file-list {
-      margin-top: 20px;
+      margin-top: 25px;
       max-height: 300px;
       overflow-y: auto;
-      border: 1px solid #ecf0f1;
-      border-radius: 5px;
-      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+      background-color: var(--dark-bg);
     }
     
     .folder-item {
-      padding: 5px 10px;
-      border-bottom: 1px solid #ecf0f1;
-      font-weight: bold;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      color: var(--hardhat);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .file-item {
-      padding: 5px 10px 5px 25px;
-      border-bottom: 1px solid #ecf0f1;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
+    }
+    
+    .file-item:hover {
+      background-color: #2A2A2A;
     }
     
     .file-item:last-child {
       border-bottom: none;
     }
     
-    .info {
-      margin-top: 30px;
-      font-size: 14px;
-      color: #7f8c8d;
-      text-align: center;
-    }
-    
     .folder-name {
-      font-weight: bold;
+      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 5px;
+      color: var(--hardhat);
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .security-notice {
+      margin-top: 30px;
+      background-color: rgba(186, 110, 77, 0.15);
+      border-radius: 4px;
+      padding: 15px 20px;
+      border-left: 4px solid var(--brick);
+    }
+    
+    .security-notice h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: var(--brick);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .security-notice p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    .twf-logo {
+      text-align: center;
+      margin-bottom: 20px;
+      display: none; /* Hide the logo */
+    }
+    
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: none; /* Hide the footer */
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--darker-bg);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555555;
     }
   </style>
 </head>
 <body>
-  <h1>HEIC to JPG Folder Converter</h1>
+  <h1>T.W. FRIERSON</h1>
+  <p class="tagline">HEIC to JPG Conversion Tool</p>
   
   <div class="container">
     <div id="drop-area" class="drop-area">
@@ -167,13 +283,14 @@
       </div>
       <div id="status" class="status">Processing files...</div>
     </div>
+    
+    <div class="security-notice">
+      <h3>No Surprises</h3>
+      <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company documents and images. Your data never leaves your device.</p>
+      <p>Created for T.W. Frierson by Joseph Winters.</p>
+    </div>
   </div>
-  
-  <div class="info">
-    <p>This tool works entirely in your browser. No files are uploaded to any server.</p>
-    <p>All converted JPG files will be in the root of the ZIP file with no folder structure.</p>
-    <p>Files from different folders with the same name will be prefixed with their folder name.</p>
-  </div>
+</body>
 
   <!-- Load required libraries from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
