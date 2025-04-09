@@ -46,9 +46,12 @@
     
     .tagline {
       text-align: center;
-      color: var(--text-secondary);
+      color: var(--concrete);
       margin-bottom: 30px;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .container {
@@ -297,7 +300,7 @@
 </head>
 <body>
   <h1>T.W. FRIERSON</h1>
-  <h2 class="tagline">HEIC to JPG Conversion Tool</h2>
+  <h2 class="tagline">HEIC TO JPG CONVERSION TOOL</h2>
   
   <div class="container">
     <div id="drop-area" class="drop-area">
@@ -621,7 +624,7 @@
         outputNote.style.margin = '10px 0';
         outputNote.style.fontSize = '14px';
         outputNote.style.color = '#BBBBBB';
-        outputNote.textContent = 'All files will be placed in a ZIP folder for download';
+        outputNote.textContent = 'All files will be placed in the root of the ZIP (no folders):';
         fileList.appendChild(outputNote);
         
         // Display all files in a flat list
