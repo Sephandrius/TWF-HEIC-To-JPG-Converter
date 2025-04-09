@@ -54,6 +54,81 @@
       letter-spacing: 0.5px;
     }
     
+    .training-box {
+      margin-bottom: 30px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .training-header {
+      background-color: var(--blue-collar);
+      color: var(--reflector);
+      padding: 12px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .training-header:hover {
+      background-color: #3A6082;
+    }
+    
+    .training-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background-color: var(--dark-bg);
+      padding: 0 15px;
+    }
+    
+    .training-content.show {
+      max-height: 2000px;
+      padding: 15px;
+      transition: max-height 0.5s ease-in, padding 0.3s linear;
+    }
+    
+    .training-content h4 {
+      color: var(--hardhat);
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .training-content h4:first-child {
+      margin-top: 0;
+    }
+    
+    .training-content ol {
+      margin-left: 20px;
+      padding-left: 0;
+    }
+    
+    .training-content li {
+      margin-bottom: 12px;
+    }
+    
+    .training-content li:last-child {
+      margin-bottom: 0;
+    }
+    
+    .training-content p {
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    
+    .training-content .note {
+      background-color: rgba(235, 196, 46, 0.1);
+      border-left: 3px solid var(--hardhat);
+      padding: 10px 15px;
+      margin: 15px 0;
+    }
+    
     .container {
       background-color: var(--dark-bg);
       border-radius: 6px;
@@ -302,6 +377,55 @@
   <h1>T.W. FRIERSON</h1>
   <h2 class="tagline">HEIC TO JPG CONVERSION TOOL</h2>
   
+  <div class="training-box">
+    <div class="training-header" onclick="toggleTraining()">
+      <span>How to Use This Tool</span>
+      <span id="training-arrow">▼</span>
+    </div>
+    <div id="training-content" class="training-content">
+      <h4>What is this tool for?</h4>
+      <p>This tool converts HEIC image files (commonly used by iPhones) to JPG format. The conversion happens entirely on your computer - no files are uploaded to the internet.</p>
+      
+      <h4>Step-by-Step Instructions</h4>
+      <ol>
+        <li><strong>Select your files:</strong> You have two options:
+          <ul>
+            <li><strong>Select individual files:</strong> Click the "Select Files" button and choose one or more HEIC files.</li>
+            <li><strong>Select an entire folder:</strong> Click the "Select Folder" button and choose a folder containing HEIC files.</li>
+          </ul>
+        </li>
+        <li><strong>Review your selection:</strong> You'll see a list of the files you've selected. You can remove any files by clicking the "✕" button next to them.</li>
+        <li><strong>Convert the files:</strong> Click the "Convert to JPG" button. The conversion process will begin.</li>
+        <li><strong>Wait for conversion:</strong> A progress bar will show you the status of the conversion.</li>
+        <li><strong>Find your converted files:</strong> Open your Downloads folder to find the ZIP file.</li>
+        <li><strong>Extract the ZIP file:</strong> 
+          <ul>
+            <li>On Windows: Right-click the ZIP file and select "Extract All". Choose a destination folder or use the default, then click "Extract".</li>
+            <li>On Mac: Double-click the ZIP file and it will automatically extract to the same location.</li>
+            <li>On mobile devices: You may need a file management app that supports ZIP extraction.</li>
+          </ul>
+        </li>
+        <li><strong>Replace your original folder:</strong> You can now safely replace your original folder with the converted folder, as it contains all your original files plus the converted HEIC images.</li>
+      </ol>
+      
+      <h4>Tips for Success</h4>
+      <div class="note">
+        <p><strong>Note:</strong> If you're working with a large number of files, the conversion might take a few minutes. Please be patient and don't close the browser window during conversion.</p>
+        <p>For folders with many non-HEIC files, the tool will preserve all original files in their original locations and only convert the HEIC images to JPG format.</p>
+      </div>
+      
+      <h4>Troubleshooting</h4>
+      <ol>
+        <li><strong>No files appear after selection:</strong> Make sure you're selecting HEIC files. Other image formats won't be recognized.</li>
+        <li><strong>The "Convert to JPG" button is grayed out:</strong> You need to select at least one HEIC file before conversion.</li>
+        <li><strong>Download doesn't start:</strong> If your ZIP file doesn't download automatically, try the conversion again with fewer files at once.</li>
+      </ol>
+      
+      <h4>Need More Help?</h4>
+      <p>If you encounter any issues or have questions about using this tool, please contact Joseph Winters. He developed this tool for T.W. Frierson and can help resolve any problems you might experience.</p>
+    </div>
+  </div>
+  
   <div class="container">
     <div id="drop-area" class="drop-area">
       <p>Drag & drop HEIC files or a folder containing HEIC files here</p>
@@ -337,6 +461,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 
   <script>
+    // Make toggleTraining available globally
+    window.toggleTraining = function() {
+      const content = document.getElementById('training-content');
+      const arrow = document.getElementById('training-arrow');
+      if (content && arrow) {
+        content.classList.toggle('show');
+        arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+      }
+    };
+    
     document.addEventListener('DOMContentLoaded', function() {
       // Files storage
       let files = [];
@@ -429,7 +563,11 @@
         
         // If no folders, process as regular files
         const droppedFiles = dt.files;
-        handleFiles({ target: { files: droppedFiles } });
+        // Check if we have any files to process
+        if (droppedFiles && droppedFiles.length > 0) {
+          // If files, just handle HEIC files
+          handleFiles({ target: { files: droppedFiles } });
+        }
       }
       
       // Process individual files
@@ -457,6 +595,7 @@
             file: file,
             path: "", // No path for individual files
             fullPath: file.name,
+            isHeic: true, // All files here are HEIC
             // Generate a unique ID for this file
             id: Math.random().toString(36).substring(2, 11)
           };
@@ -476,22 +615,12 @@
           return;
         }
         
-        // Filter only HEIC files
-        const heicFiles = Array.from(inputFiles).filter(file => 
-          file.name.toLowerCase().endsWith('.heic')
-        );
-        
-        if (heicFiles.length === 0) {
-          alert('No HEIC files found in the selected folder.');
-          return;
-        }
-        
         // Get folder name from the path of the first file
-        const pathParts = heicFiles[0].webkitRelativePath.split('/');
+        const pathParts = inputFiles[0].webkitRelativePath.split('/');
         sourceName = pathParts[0];
         
-        // Store files with their relative paths
-        files = heicFiles.map(file => {
+        // Store ALL files with their relative paths (not just HEIC files)
+        files = Array.from(inputFiles).map(file => {
           // Get the path excluding the root folder and filename
           const fullPath = file.webkitRelativePath;
           const pathParts = fullPath.split('/');
@@ -506,14 +635,22 @@
             file: file,
             path: relativePath,
             fullPath: pathParts.join('/'), // This no longer includes the root folder
+            isHeic: file.name.toLowerCase().endsWith('.heic'),
             // Generate a unique ID for this file
             id: Math.random().toString(36).substring(2, 11)
           };
         });
         
+        // Check if we have any HEIC files
+        const hasHeicFiles = files.some(fileInfo => fileInfo.isHeic);
+        
+        if (!hasHeicFiles) {
+          alert('No HEIC files found in the selected folder. All other files will still be included in the output.');
+        }
+        
         updateFileList();
         
-        // Enable convert button
+        // Enable convert button if we have any files
         convertBtn.disabled = files.length === 0;
       }
       
@@ -524,17 +661,19 @@
         
         try {
           const entries = await readDirectoryEntries(directoryEntry);
-          const heicFiles = await processEntries(entries, "");
+          const allFiles = await processAllEntries(entries, "");
           
-          if (heicFiles.length === 0) {
-            alert('No HEIC files found in the folder.');
-            return;
+          // Check if there are any HEIC files
+          const hasHeicFiles = allFiles.some(fileInfo => fileInfo.isHeic);
+          
+          if (!hasHeicFiles) {
+            alert('No HEIC files found in the folder. All other files will still be included in the output.');
           }
           
-          files = heicFiles;
+          files = allFiles;
           updateFileList();
           
-          // Enable convert button
+          // Enable convert button if we have any files
           convertBtn.disabled = files.length === 0;
         } catch (error) {
           console.error("Error processing directory:", error);
@@ -563,38 +702,37 @@
         });
       }
       
-      // Process entries recursively
-      async function processEntries(entries, path) {
-        const files = [];
+      // Process all entries recursively (including non-HEIC files)
+      async function processAllEntries(entries, path) {
+        const results = [];
         
         for (const entry of entries) {
           if (entry.isFile) {
-            if (entry.name.toLowerCase().endsWith('.heic')) {
-              try {
-                const file = await getFileFromEntry(entry);
-                files.push({
-                  file: file,
-                  path: path, // Path without the root folder name
-                  fullPath: path ? path + '/' + file.name : file.name,
-                  id: Math.random().toString(36).substring(2, 11)
-                });
-              } catch (error) {
-                console.error(`Error getting file ${entry.name}:`, error);
-              }
+            try {
+              const file = await getFileFromEntry(entry);
+              results.push({
+                file: file,
+                path: path, // Path without the root folder name
+                fullPath: path ? path + '/' + file.name : file.name,
+                isHeic: file.name.toLowerCase().endsWith('.heic'),
+                id: Math.random().toString(36).substring(2, 11)
+              });
+            } catch (error) {
+              console.error(`Error getting file ${entry.name}:`, error);
             }
           } else if (entry.isDirectory) {
             try {
               const subEntries = await readDirectoryEntries(entry);
               const newPath = path ? path + '/' + entry.name : entry.name;
-              const subFiles = await processEntries(subEntries, newPath);
-              files.push(...subFiles);
+              const subFiles = await processAllEntries(subEntries, newPath);
+              results.push(...subFiles);
             } catch (error) {
               console.error(`Error processing directory ${entry.name}:`, error);
             }
           }
         }
         
-        return files;
+        return results;
       }
       
       // Get file from FileEntry
@@ -624,42 +762,60 @@
         outputNote.style.margin = '10px 0';
         outputNote.style.fontSize = '14px';
         outputNote.style.color = '#BBBBBB';
-        outputNote.textContent = 'All files will be placed in the root of the ZIP (no folders):';
+        outputNote.textContent = 'All files from the folder will be kept, with HEIC files converted to JPG:';
         fileList.appendChild(outputNote);
         
-        // Display all files in a flat list
-        files.forEach((fileInfo) => {
-          const fileItem = document.createElement('div');
-          fileItem.className = 'file-item';
-          
-          // Show the output filename with folder prefix if needed
-          let outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
-          if (fileInfo.path) {
-            const pathParts = fileInfo.path.split('/');
-            const lastFolder = pathParts[pathParts.length - 1];
-            outputName = lastFolder ? lastFolder + '_' + outputName : outputName;
+        // Group files by path
+        const pathGroups = {};
+        files.forEach(fileInfo => {
+          const path = fileInfo.path || '(root)';
+          if (!pathGroups[path]) {
+            pathGroups[path] = [];
+          }
+          pathGroups[path].push(fileInfo);
+        });
+        
+        // Display files grouped by path
+        Object.keys(pathGroups).sort().forEach(path => {
+          // Add path header if not root
+          if (path !== '(root)') {
+            const pathHeader = document.createElement('div');
+            pathHeader.className = 'folder-item';
+            pathHeader.textContent = `/${path}`;
+            fileList.appendChild(pathHeader);
           }
           
-          // Show original path and output name
-          fileItem.innerHTML = `
-            <div><small>${fileInfo.path ? fileInfo.path + '/' : ''}${fileInfo.file.name}</small></div>
-            <div>${outputName} (${formatFileSize(fileInfo.file.size)})
-              <span style="float: right; cursor: pointer; color: #BA6E4D;" 
-                    onclick="removeFile('${fileInfo.id}')">✕</span>
-            </div>
-          `;
-          fileList.appendChild(fileItem);
+          // Display files in this path
+          pathGroups[path].forEach(fileInfo => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            // Format differently based on file type
+            if (fileInfo.isHeic) {
+              // Show conversion for HEIC files
+              let outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
+              
+              fileItem.innerHTML = `
+                <div><small>${fileInfo.file.name} (HEIC)</small></div>
+                <div>→ ${outputName} (${formatFileSize(fileInfo.file.size)})
+                  <span style="float: right; cursor: pointer; color: #BA6E4D;" 
+                        onclick="removeFile('${fileInfo.id}')">✕</span>
+                </div>
+              `;
+            } else {
+              // Just show the file for non-HEIC
+              fileItem.innerHTML = `
+                <div>${fileInfo.file.name} (${formatFileSize(fileInfo.file.size)})
+                  <span style="float: right; cursor: pointer; color: #BA6E4D;" 
+                        onclick="removeFile('${fileInfo.id}')">✕</span>
+                </div>
+              `;
+            }
+            
+            fileList.appendChild(fileItem);
+          });
         });
       }
-      
-      // Remove a file from the list
-      window.removeFile = function(fileId) {
-        files = files.filter(file => file.id !== fileId);
-        updateFileList();
-        convertBtn.disabled = files.length === 0;
-      };
-      
-      // -------- Conversion functions --------
       
       // Convert files to JPG and create a ZIP
       async function convertFiles() {
@@ -675,6 +831,12 @@
           // Create a new JSZip instance
           const zip = new JSZip();
           
+          // Set appropriate name for the ZIP
+          let zipName = 'converted_images.zip';
+          if (sourceName && sourceName !== "Selected Files") {
+            zipName = `${sourceName}_converted.zip`;
+          }
+          
           // Process each file
           let processed = 0;
           let totalFiles = files.length;
@@ -682,34 +844,34 @@
           for (const fileInfo of files) {
             // Update status
             processed++;
-            statusText.textContent = `Converting ${processed} of ${totalFiles}: ${fileInfo.file.name}`;
+            statusText.textContent = `Processing ${processed} of ${totalFiles}: ${fileInfo.file.name}`;
             progressBar.style.width = `${(processed / totalFiles) * 90}%`;
             
             try {
-              // Convert HEIC to JPEG using heic2any
-              const jpegBlob = await heic2any({
-                blob: fileInfo.file,
-                toType: 'image/jpeg',
-                quality: 0.9
-              });
-              
-              // Get file name without extension and add jpg extension
-              let outputName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
-              
-              // Add folder prefix if from a subfolder
-              if (fileInfo.path) {
-                const pathParts = fileInfo.path.split('/');
-                const lastFolder = pathParts[pathParts.length - 1];
-                if (lastFolder) {
-                  outputName = lastFolder + '_' + outputName;
-                }
+              if (fileInfo.isHeic) {
+                // Convert HEIC to JPEG
+                statusText.textContent = `Converting ${fileInfo.file.name} to JPG...`;
+                const jpegBlob = await heic2any({
+                  blob: fileInfo.file,
+                  toType: 'image/jpeg',
+                  quality: 0.9
+                });
+                
+                // Get file name without extension and add jpg extension
+                const outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
+                
+                // Add to zip in the correct path
+                const filePath = fileInfo.path ? fileInfo.path + '/' + outputName : outputName;
+                zip.file(filePath, jpegBlob);
+              } else {
+                // For non-HEIC files, just add them to the zip as-is
+                statusText.textContent = `Adding ${fileInfo.file.name} to archive...`;
+                const filePath = fileInfo.path ? fileInfo.path + '/' + fileInfo.file.name : fileInfo.file.name;
+                zip.file(filePath, fileInfo.file);
               }
-              
-              // Add to zip
-              zip.file(outputName, jpegBlob);
             } catch (err) {
-              console.error(`Error converting ${fileInfo.file.name}:`, err);
-              statusText.textContent = `Error with ${fileInfo.file.name}: ${err.message || 'Conversion failed'}`;
+              console.error(`Error processing ${fileInfo.file.name}:`, err);
+              statusText.textContent = `Error with ${fileInfo.file.name}: ${err.message || 'Processing failed'}`;
               await new Promise(resolve => setTimeout(resolve, 1500)); // Show error briefly before continuing
             }
           }
@@ -728,7 +890,7 @@
           });
           
           // Save the ZIP file using FileSaver.js
-          saveAs(zipBlob, 'converted_images.zip');
+          saveAs(zipBlob, zipName);
           
           // Update status
           statusText.textContent = 'Conversion completed!';
@@ -742,10 +904,17 @@
           
         } catch (error) {
           console.error('Conversion error:', error);
-          statusText.textContent = `Error: ${error.message || 'Failed to convert files'}`;
+          statusText.textContent = `Error: ${error.message || 'Failed to process files'}`;
           convertBtn.disabled = false;
         }
       }
+      
+      // Make removeFile accessible in the global scope
+      window.removeFile = function(fileId) {
+        files = files.filter(file => file.id !== fileId);
+        updateFileList();
+        convertBtn.disabled = files.length === 0;
+      };
     });
   </script>
 </body>
