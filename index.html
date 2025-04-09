@@ -1,451 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HEIC to JPG Folder Converter</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .dropzone {
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background-color 0.3s;
-        }
-        .dropzone:hover {
-            background-color: #e8f4fc;
-        }
-        .buttons {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 0 10px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        #progressContainer {
-            margin-top: 20px;
-            display: none;
-        }
-        progress {
-            width: 100%;
-            height: 20px;
-            margin-bottom: 10px;
-        }
-        #fileList {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-        .file-item {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-        }
-        .file-item:last-child {
-            border-bottom: none;
-        }
-        .file-icon {
-            margin-right: 10px;
-            color: #3498db;
-        }
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        #dropInfo {
-            margin-bottom: 10px;
-        }
-        .status {
-            margin-top: 10px;
-            font-style: italic;
-        }
-        .folder-stats {
-            background-color: #e8f4fc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 20px;
-            display: none;
-        }
-        #log {
-            margin-top: 15px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            max-height: 150px;
-            overflow-y: auto;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEIC to JPG Folder Converter</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    
+    .container {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .drop-area {
+      border: 2px dashed #3498db;
+      border-radius: 5px;
+      padding: 40px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      background-color: #f0f8ff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .drop-area.highlight {
+      background-color: #d6eaf8;
+    }
+    
+    .folder-input {
+      display: none;
+    }
+    
+    .upload-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    
+    .upload-button:hover {
+      background-color: #2980b9;
+    }
+    
+    .convert-button {
+      display: block;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 20px auto;
+      transition: background-color 0.3s;
+    }
+    
+    .convert-button:hover {
+      background-color: #27ae60;
+    }
+    
+    .convert-button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    .progress-container {
+      margin-top: 20px;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background-color: #ecf0f1;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: #3498db;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .status {
+      font-size: 14px;
+      color: #7f8c8d;
+      text-align: center;
+    }
+    
+    .file-list {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ecf0f1;
+      border-radius: 5px;
+      padding: 10px;
+    }
+    
+    .folder-item {
+      padding: 5px 10px;
+      border-bottom: 1px solid #ecf0f1;
+      font-weight: bold;
+    }
+    
+    .file-item {
+      padding: 5px 10px 5px 25px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .info {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #7f8c8d;
+      text-align: center;
+    }
+    
+    .folder-name {
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>HEIC to JPG Folder Converter</h1>
-    <div class="container">
-        <div id="dropzone" class="dropzone">
-            <div id="dropInfo">Select a folder containing HEIC images</div>
-            <input type="file" id="folderInput" style="display: none;" webkitdirectory directory multiple>
-        </div>
-        
-        <div class="folder-stats" id="folderStats">
-            <p>Folder structure loaded. Ready to convert.</p>
-            <div id="statsContent"></div>
-        </div>
-        
-        <div id="fileList"></div>
-        
-        <div class="buttons">
-            <button id="convertBtn" disabled>Convert to JPG</button>
-            <button id="downloadBtn" disabled>Download ZIP</button>
-        </div>
-        
-        <div id="progressContainer">
-            <progress id="progressBar" value="0" max="100"></progress>
-            <div id="status" class="status">Processing images...</div>
-        </div>
-        
-        <div id="log"></div>
+  <h1>HEIC to JPG Folder Converter</h1>
+  
+  <div class="container">
+    <div id="drop-area" class="drop-area">
+      <p>Drag & drop a folder containing HEIC files here or</p>
+      <input type="file" id="folder-input" class="folder-input" webkitdirectory directory multiple>
+      <button class="upload-button" onclick="document.getElementById('folder-input').click()">Select Folder</button>
     </div>
     
-    <footer>
-        <p>This tool converts HEIC images to JPG format directly in your browser. No files are uploaded to any server.</p>
-        <p>All JPGs are saved at 100% quality and maintain the original folder structure.</p>
-    </footer>
+    <div id="file-list" class="file-list" style="display: none;"></div>
+    
+    <button id="convert-btn" class="convert-button" disabled>Convert to JPG</button>
+    
+    <div id="progress-container" class="progress-container">
+      <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+      </div>
+      <div id="status" class="status">Processing files...</div>
+    </div>
+  </div>
+  
+  <div class="info">
+    <p>This tool works entirely in your browser. No files are uploaded to any server.</p>
+    <p>The converted images will be downloaded as a ZIP file with the original folder structure preserved.</p>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropzone = document.getElementById('dropzone');
-            const folderInput = document.getElementById('folderInput');
-            const convertBtn = document.getElementById('convertBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBar = document.getElementById('progressBar');
-            const status = document.getElementById('status');
-            const fileList = document.getElementById('fileList');
-            const folderStats = document.getElementById('folderStats');
-            const statsContent = document.getElementById('statsContent');
-            const logElement = document.getElementById('log');
-            
-            let files = [];
-            let folderName = '';
-            let convertedFiles = [];
-            let zipBlob = null;
-            
-            // Simple logging function
-            function log(message) {
-                console.log(message);
-                logElement.style.display = 'block';
-                logElement.textContent += message + '\n';
-                logElement.scrollTop = logElement.scrollHeight;
-            }
-            
-            // Setup the dropzone
-            dropzone.addEventListener('click', () => folderInput.click());
-            
-            folderInput.addEventListener('change', (e) => {
-                handleFolderSelection(e.target.files);
-            });
-            
-            function handleFolderSelection(fileList) {
-                // Reset
-                files = [];
-                convertedFiles = [];
-                
-                // Filter only HEIC files
-                files = Array.from(fileList).filter(file => 
-                    file.name.toLowerCase().endsWith('.heic') || 
-                    file.type === 'image/heic');
-                
-                if (files.length === 0) {
-                    alert('No HEIC files found in the selected folder.');
-                    return;
-                }
-                
-                // Extract folder name from the first file's path
-                const firstPath = files[0].webkitRelativePath;
-                folderName = firstPath.split('/')[0];
-                
-                // Display folder stats
-                updateFolderStats();
-                displayFileList();
-                
-                // Enable conversion
-                convertBtn.disabled = false;
-            }
-            
-            function updateFolderStats() {
-                document.getElementById('dropInfo').textContent = 
-                    `Folder "${folderName}" loaded with ${files.length} HEIC files`;
-                
-                // Count subfolder paths
-                const paths = files.map(file => {
-                    const path = file.webkitRelativePath;
-                    const parts = path.split('/');
-                    parts.pop(); // Remove filename
-                    parts.shift(); // Remove root folder
-                    return parts.join('/');
-                });
-                
-                const uniquePaths = [...new Set(paths)].filter(p => p !== '');
-                
-                statsContent.innerHTML = `
-                    <p><strong>Total HEIC files:</strong> ${files.length}</p>
-                    <p><strong>Subfolders:</strong> ${uniquePaths.length}</p>
-                `;
-                
-                folderStats.style.display = 'block';
-            }
-            
-            function displayFileList() {
-                fileList.innerHTML = '';
-                
-                // Group files by directory
-                const filesByDir = {};
-                
-                files.forEach(file => {
-                    const path = file.webkitRelativePath;
-                    const parts = path.split('/');
-                    const fileName = parts.pop();
-                    const directory = parts.join('/');
-                    
-                    if (!filesByDir[directory]) {
-                        filesByDir[directory] = [];
-                    }
-                    filesByDir[directory].push(fileName);
-                });
-                
-                // Create directory tree
-                const listHTML = [`<div class="file-item"><span class="file-icon">📁</span> <strong>${folderName}</strong></div>`];
-                
-                for (const dir in filesByDir) {
-                    const fileCount = filesByDir[dir].length;
-                    const dirParts = dir.split('/');
-                    const dirName = dirParts[dirParts.length - 1] || folderName;
-                    const indent = '&nbsp;'.repeat((dirParts.length - 1) * 4);
-                    
-                    listHTML.push(`
-                        <div class="file-item">
-                            ${indent}<span class="file-icon">📁</span> ${dirName} (${fileCount} HEIC files)
-                        </div>
-                    `);
-                }
-                
-                fileList.innerHTML = listHTML.join('');
-                fileList.style.display = 'block';
-            }
-            
-            // Simple HEIC to JPG conversion using canvas
-            async function heicToJpeg(heicBlob) {
-                return new Promise((resolve, reject) => {
-                    try {
-                        const url = URL.createObjectURL(heicBlob);
-                        const img = new Image();
-                        
-                        img.onload = () => {
-                            URL.revokeObjectURL(url);
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
-                            
-                            canvas.toBlob(resolve, 'image/jpeg', 1.0);
-                        };
-                        
-                        img.onerror = () => {
-                            URL.revokeObjectURL(url);
-                            reject(new Error('Failed to load HEIC image'));
-                        };
-                        
-                        img.src = url;
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-            }
-            
-            // Handle conversion
-            convertBtn.addEventListener('click', async () => {
-                if (files.length === 0) return;
-                
-                convertedFiles = [];
-                progressContainer.style.display = 'block';
-                convertBtn.disabled = true;
-                downloadBtn.disabled = true;
-                
-                log(`Starting conversion of ${files.length} HEIC files...`);
-                
-                // We'll use a simple object as our zip structure
-                const zipData = {};
-                
-                // Process each file
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    progressBar.value = (i / files.length) * 100;
-                    
-                    // Get relative path without root folder name
-                    let relativePath = file.webkitRelativePath;
-                    const pathParts = relativePath.split('/');
-                    pathParts.shift(); // Remove root folder
-                    relativePath = pathParts.join('/');
-                    
-                    status.textContent = `Converting ${i+1}/${files.length}: ${relativePath}`;
-                    log(`Converting: ${relativePath}`);
-                    
-                    try {
-                        // Read the HEIC file
-                        const fileContent = await readFileAsArrayBuffer(file);
-                        
-                        // Convert to JPG (using native method first, then fallback)
-                        let jpgBlob;
-                        try {
-                            // Try using createImageBitmap if available
-                            if (window.createImageBitmap && window.OffscreenCanvas) {
-                                const bitmap = await createImageBitmap(new Blob([fileContent]));
-                                const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(bitmap, 0, 0);
-                                jpgBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 1.0 });
-                            } else {
-                                // Fallback to traditional canvas
-                                jpgBlob = await heicToJpeg(new Blob([fileContent]));
-                            }
-                        } catch (err) {
-                            log(`Using fallback conversion for: ${relativePath}`);
-                            // Ultimate fallback - create a placeholder JPEG
-                            jpgBlob = new Blob(['JPEG Placeholder'], { type: 'image/jpeg' });
-                        }
-                        
-                        // Change the extension in the path
-                        const jpgPath = relativePath.replace(/\.heic$/i, '.jpg');
-                        
-                        // Store the JPG data
-                        zipData[jpgPath] = jpgBlob;
-                        
-                        // Add to our converted files list
-                        convertedFiles.push({
-                            originalPath: relativePath,
-                            jpgPath: jpgPath,
-                            jpgBlob: jpgBlob
-                        });
-                        
-                    } catch (error) {
-                        log(`Error converting ${relativePath}: ${error.message}`);
-                        status.textContent = `Error converting ${relativePath}. See log for details.`;
-                    }
-                }
-                
-                log(`Conversion complete. ${convertedFiles.length} of ${files.length} files converted.`);
-                progressBar.value = 100;
-                status.textContent = `Converted ${convertedFiles.length} of ${files.length} files successfully.`;
-                
-                // Create ZIP file
-                try {
-                    log('Creating ZIP file...');
-                    zipBlob = await createZip(zipData, `${folderName}_JPG`);
-                    log('ZIP file created successfully!');
-                    downloadBtn.disabled = false;
-                } catch (error) {
-                    log(`Error creating ZIP: ${error.message}`);
-                    status.textContent = 'Error creating ZIP file. See log for details.';
-                }
-            });
-            
-            // Read file as ArrayBuffer
-            function readFileAsArrayBuffer(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Could not read file'));
-                    reader.readAsArrayBuffer(file);
-                });
-            }
-            
-            // Simple manual ZIP creation
-            async function createZip(files, rootFolder) {
-                // This is a very simplified ZIP creation
-                // For a real application, you'd want to use JSZip or similar
-                
-                // Create a simple ZIP structure with the files
-                const zip = new Blob(
-                    [new Uint8Array([80, 75, 3, 4]).buffer], // PK header
-                    { type: 'application/zip' }
-                );
-                
-                return zip;
-            }
-            
-            // Handle ZIP download - simplified version
-            downloadBtn.addEventListener('click', () => {
-                if (!zipBlob) return;
-                
-                const downloadLink = document.createElement('a');
-                downloadLink.href = URL.createObjectURL(zipBlob);
-                downloadLink.download = `${folderName}_JPG.zip`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                
-                log('ZIP file download started.');
-                status.textContent = `ZIP file "${folderName}_JPG.zip" download started.`;
-                
-                // Alternative: Download individual JPEGs
-                log('Also providing individual JPG downloads as fallback...');
-                convertedFiles.forEach((file, index) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(file.jpgBlob);
-                        link.download = file.jpgPath.split('/').pop(); // Just the filename
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }, index * 500); // Space out downloads to prevent browser blocking
-                });
-            });
+  <!-- Load required libraries from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+  <script>
+    // Files storage with path information
+    let folderFiles = [];
+    let folderName = "";
+    
+    // Elements
+    const dropArea = document.getElementById('drop-area');
+    const folderInput = document.getElementById('folder-input');
+    const fileList = document.getElementById('file-list');
+    const convertBtn = document.getElementById('convert-btn');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress');
+    const statusText = document.getElementById('status');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Handle dropped folders
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    // Handle selected folders
+    folderInput.addEventListener('change', handleFolder, false);
+    
+    // Convert button event
+    convertBtn.addEventListener('click', convertFiles, false);
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropArea.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+      dropArea.classList.remove('highlight');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const items = dt.items;
+      
+      // Check if any folders were dropped
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === 'file' && item.webkitGetAsEntry) {
+          const entry = item.webkitGetAsEntry();
+          if (entry.isDirectory) {
+            processDirectory(entry);
+            return;
+          }
+        }
+      }
+      
+      // If no folders, process as regular files
+      const files = dt.files;
+      handleFolder({ target: { files } });
+    }
+    
+    function processDirectory(directoryEntry) {
+      folderName = directoryEntry.name;
+      folderFiles = [];
+      
+      const reader = directoryEntry.createReader();
+      readAllDirectoryEntries(reader, []).then(entries => {
+        const heicFilesPromises = [];
+        
+        // Process all entries recursively
+        processEntries(entries, "").then(files => {
+          if (files.length === 0) {
+            alert('No HEIC files found in the folder.');
+            return;
+          }
+          
+          folderFiles = files;
+          updateFileList();
+          
+          // Enable convert button
+          convertBtn.disabled = folderFiles.length === 0;
         });
-    </script>
+      });
+    }
+    
+    async function readAllDirectoryEntries(directoryReader, result) {
+      let entries = await readEntriesPromise(directoryReader);
+      if (entries.length) {
+        result = result.concat(entries);
+        return readAllDirectoryEntries(directoryReader, result);
+      }
+      return result;
+    }
+    
+    function readEntriesPromise(directoryReader) {
+      return new Promise((resolve, reject) => {
+        directoryReader.readEntries(resolve, reject);
+      });
+    }
+    
+    async function processEntries(entries, path) {
+      const files = [];
+      
+      for (const entry of entries) {
+        if (entry.isFile) {
+          if (entry.name.toLowerCase().endsWith('.heic')) {
+            const file = await getFileFromEntry(entry);
+            files.push({
+              file: file,
+              path: path,
+              fullPath: path ? path + '/' + file.name : file.name
+            });
+          }
+        } else if (entry.isDirectory) {
+          const directoryReader = entry.createReader();
+          const subEntries = await readAllDirectoryEntries(directoryReader, []);
+          const newPath = path ? path + '/' + entry.name : entry.name;
+          const subFiles = await processEntries(subEntries, newPath);
+          files.push(...subFiles);
+        }
+      }
+      
+      return files;
+    }
+    
+    function getFileFromEntry(fileEntry) {
+      return new Promise((resolve, reject) => {
+        fileEntry.file(resolve, reject);
+      });
+    }
+    
+    function handleFolder(e) {
+      const files = Array.from(e.target.files);
+      
+      // Filter only HEIC files
+      const heicFiles = files.filter(file => 
+        file.name.toLowerCase().endsWith('.heic')
+      );
+      
+      if (heicFiles.length === 0) {
+        alert('No HEIC files found in the selected folder.');
+        return;
+      }
+      
+      // Get folder name from the path of the first file
+      const pathParts = heicFiles[0].webkitRelativePath.split('/');
+      folderName = pathParts[0];
+      
+      // Store files with their relative paths
+      folderFiles = heicFiles.map(file => {
+        // Get the path excluding the filename
+        const fullPath = file.webkitRelativePath;
+        const path = fullPath.substring(0, fullPath.lastIndexOf('/'));
+        
+        return {
+          file: file,
+          path: path,
+          fullPath: fullPath
+        };
+      });
+      
+      updateFileList();
+      
+      // Enable convert button
+      convertBtn.disabled = folderFiles.length === 0;
+    }
+    
+    function updateFileList() {
+      if (folderFiles.length === 0) {
+        fileList.style.display = 'none';
+        return;
+      }
+      
+      fileList.style.display = 'block';
+      fileList.innerHTML = '';
+      
+      const folderHeading = document.createElement('div');
+      folderHeading.className = 'folder-name';
+      folderHeading.textContent = `Folder: ${folderName}`;
+      fileList.appendChild(folderHeading);
+      
+      // Group files by subfolder
+      const folderStructure = {};
+      
+      folderFiles.forEach(fileInfo => {
+        const path = fileInfo.path;
+        if (!folderStructure[path]) {
+          folderStructure[path] = [];
+        }
+        folderStructure[path].push(fileInfo);
+      });
+      
+      // Display folder structure
+      Object.keys(folderStructure).sort().forEach(path => {
+        const displayPath = path.replace(folderName + '/', '');
+        
+        if (displayPath) {
+          const folderItem = document.createElement('div');
+          folderItem.className = 'folder-item';
+          folderItem.textContent = `/${displayPath}`;
+          fileList.appendChild(folderItem);
+        }
+        
+        // Display files in this folder
+        folderStructure[path].forEach(fileInfo => {
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          fileItem.textContent = `${fileInfo.file.name} (${formatFileSize(fileInfo.file.size)})`;
+          fileList.appendChild(fileItem);
+        });
+      });
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    async function convertFiles() {
+      if (folderFiles.length === 0) return;
+      
+      // Show progress
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      statusText.textContent = 'Preparing to convert...';
+      convertBtn.disabled = true;
+      
+      try {
+        // Create a new JSZip instance
+        const zip = new JSZip();
+        const rootFolder = zip.folder(folderName + "_converted");
+        
+        // Process each file
+        let processed = 0;
+        let totalFiles = folderFiles.length;
+        
+        for (const fileInfo of folderFiles) {
+          // Update status
+          statusText.textContent = `Converting ${++processed} of ${totalFiles}: ${fileInfo.file.name}`;
+          progressBar.style.width = `${(processed / totalFiles) * 90}%`;
+          
+          try {
+            // Convert HEIC to JPEG using heic2any
+            const jpegBlob = await heic2any({
+              blob: fileInfo.file,
+              toType: 'image/jpeg',
+              quality: 0.9
+            });
+            
+            // Get file name without extension
+            const fileName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
+            
+            // Get relative path within the folder structure
+            const relativePath = fileInfo.fullPath.substring(
+              fileInfo.fullPath.indexOf('/')
+            ).replace(/^\//, '');
+            
+            const outputPath = relativePath.replace(/\.heic$/i, '.jpg');
+            
+            // Add to zip with the correct path
+            rootFolder.file(outputPath, jpegBlob);
+          } catch (err) {
+            console.error(`Error converting ${fileInfo.file.name}:`, err);
+            // Continue with other files
+          }
+        }
+        
+        // Update status
+        statusText.textContent = 'Creating ZIP file...';
+        progressBar.style.width = '90%';
+        
+        // Generate the ZIP file
+        const zipBlob = await zip.generateAsync({ 
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        }, (metadata) => {
+          progressBar.style.width = `${90 + metadata.percent / 10}%`;
+        });
+        
+        // Save the ZIP file using FileSaver.js
+        saveAs(zipBlob, `${folderName}_converted.zip`);
+        
+        // Update status
+        statusText.textContent = 'Conversion completed!';
+        progressBar.style.width = '100%';
+        
+        // Reset after a delay
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          convertBtn.disabled = false;
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Conversion error:', error);
+        statusText.textContent = `Error: ${error.message || 'Failed to convert files'}`;
+        convertBtn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
