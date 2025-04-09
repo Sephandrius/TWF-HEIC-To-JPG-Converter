@@ -251,15 +251,14 @@
       handleFolder({ target: { files } });
     }
     
-    function processDirectory(directoryEntry) {
+    async function processDirectory(directoryEntry) {
       folderName = directoryEntry.name;
       folderFiles = [];
       
       const reader = directoryEntry.createReader();
       readAllDirectoryEntries(reader, []).then(entries => {
-        const heicFilesPromises = [];
-        
-        // Process all entries recursively
+        // Process all entries recursively, starting with an empty base path
+        // The second parameter is the base path, empty string means root directory
         processEntries(entries, "").then(files => {
           if (files.length === 0) {
             alert('No HEIC files found in the folder.');
@@ -297,10 +296,11 @@
         if (entry.isFile) {
           if (entry.name.toLowerCase().endsWith('.heic')) {
             const file = await getFileFromEntry(entry);
+            // Store the file with the path, but exclude the root folder name
             files.push({
               file: file,
-              path: path,
-              fullPath: path ? path + '/' + file.name : file.name
+              path: path, // This is the folder path without the root folder name
+              fullPath: path ? path + '/' + file.name : file.name // This is the full path without the root folder name
             });
           }
         } else if (entry.isDirectory) {
@@ -321,7 +321,7 @@
       });
     }
     
-    function handleFolder(e) {
+    async function handleFolder(e) {
       const files = Array.from(e.target.files);
       
       // Filter only HEIC files
@@ -340,14 +340,20 @@
       
       // Store files with their relative paths
       folderFiles = heicFiles.map(file => {
-        // Get the path excluding the filename
+        // Get the path excluding the root folder and filename
         const fullPath = file.webkitRelativePath;
-        const path = fullPath.substring(0, fullPath.lastIndexOf('/'));
+        const pathParts = fullPath.split('/');
+        pathParts.shift(); // Remove the root folder name
+        
+        // If there's just one part left, it's a file directly in the root
+        const relativePath = pathParts.length > 1 ? 
+          pathParts.slice(0, -1).join('/') : 
+          '';
         
         return {
           file: file,
-          path: path,
-          fullPath: fullPath
+          path: relativePath,
+          fullPath: pathParts.join('/') // This no longer includes the root folder
         };
       });
       
@@ -368,8 +374,16 @@
       
       const folderHeading = document.createElement('div');
       folderHeading.className = 'folder-name';
-      folderHeading.textContent = `Folder: ${folderName}`;
+      folderHeading.textContent = `Source Folder: ${folderName}`;
       fileList.appendChild(folderHeading);
+      
+      // Note about output structure
+      const outputNote = document.createElement('div');
+      outputNote.style.margin = '10px 0';
+      outputNote.style.fontSize = '14px';
+      outputNote.style.color = '#666';
+      outputNote.textContent = 'Output structure (no extra folder nesting):';
+      fileList.appendChild(outputNote);
       
       // Group files by subfolder
       const folderStructure = {};
@@ -384,12 +398,16 @@
       
       // Display folder structure
       Object.keys(folderStructure).sort().forEach(path => {
-        const displayPath = path.replace(folderName + '/', '');
-        
-        if (displayPath) {
+        if (path) {
           const folderItem = document.createElement('div');
           folderItem.className = 'folder-item';
-          folderItem.textContent = `/${displayPath}`;
+          folderItem.textContent = `/${path}`;
+          fileList.appendChild(folderItem);
+        } else {
+          // Root directory
+          const folderItem = document.createElement('div');
+          folderItem.className = 'folder-item';
+          folderItem.textContent = '/ (root)';
           fileList.appendChild(folderItem);
         }
         
@@ -397,7 +415,8 @@
         folderStructure[path].forEach(fileInfo => {
           const fileItem = document.createElement('div');
           fileItem.className = 'file-item';
-          fileItem.textContent = `${fileInfo.file.name} (${formatFileSize(fileInfo.file.size)})`;
+          const jpgName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
+          fileItem.textContent = `${jpgName} (${formatFileSize(fileInfo.file.size)})`;
           fileList.appendChild(fileItem);
         });
       });
@@ -446,22 +465,14 @@
             // Get file name without extension and add jpg extension
             const fileName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
             
-            // Extract path relative to the root folder
-            // This removes the initial folder name to avoid nested folders when extracting
-            let relativePath = '';
-            const pathParts = fileInfo.fullPath.split('/');
+            // Use the path directly without any extra processing
+            // This should already have the root folder name removed
+            const outputPath = fileInfo.path ? 
+              fileInfo.path + '/' + fileName : 
+              fileName;
             
-            if (pathParts.length > 1) {
-              // Skip the first part (root folder name) and build the path
-              pathParts.shift(); // Remove the root folder name
-              relativePath = pathParts.join('/').replace(/\.heic$/i, '.jpg');
-            } else {
-              // If there's no slash, this is a file directly in the root
-              relativePath = fileName;
-            }
-            
-            // Add to zip without creating an extra root folder
-            zip.file(relativePath, jpegBlob);
+            // Add to zip
+            zip.file(outputPath, jpegBlob);
           } catch (err) {
             console.error(`Error converting ${fileInfo.file.name}:`, err);
             // Continue with other files
