@@ -171,7 +171,8 @@
   
   <div class="info">
     <p>This tool works entirely in your browser. No files are uploaded to any server.</p>
-    <p>The converted images will be downloaded as a ZIP file with the original folder structure preserved.</p>
+    <p>All converted JPG files will be in the root of the ZIP file with no folder structure.</p>
+    <p>Files from different folders with the same name will be prefixed with their folder name.</p>
   </div>
 
   <!-- Load required libraries from CDN -->
@@ -382,43 +383,28 @@
       outputNote.style.margin = '10px 0';
       outputNote.style.fontSize = '14px';
       outputNote.style.color = '#666';
-      outputNote.textContent = 'Output structure (no extra folder nesting):';
+      outputNote.textContent = 'All files will be placed in the root of the ZIP (no folders):';
       fileList.appendChild(outputNote);
       
-      // Group files by subfolder
-      const folderStructure = {};
-      
+      // Display all files in a flat list
       folderFiles.forEach(fileInfo => {
-        const path = fileInfo.path;
-        if (!folderStructure[path]) {
-          folderStructure[path] = [];
-        }
-        folderStructure[path].push(fileInfo);
-      });
-      
-      // Display folder structure
-      Object.keys(folderStructure).sort().forEach(path => {
-        if (path) {
-          const folderItem = document.createElement('div');
-          folderItem.className = 'folder-item';
-          folderItem.textContent = `/${path}`;
-          fileList.appendChild(folderItem);
-        } else {
-          // Root directory
-          const folderItem = document.createElement('div');
-          folderItem.className = 'folder-item';
-          folderItem.textContent = '/ (root)';
-          fileList.appendChild(folderItem);
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        // Show the output filename with folder prefix if needed
+        let outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
+        if (fileInfo.path) {
+          const pathParts = fileInfo.path.split('/');
+          const lastFolder = pathParts[pathParts.length - 1];
+          outputName = lastFolder + '_' + outputName;
         }
         
-        // Display files in this folder
-        folderStructure[path].forEach(fileInfo => {
-          const fileItem = document.createElement('div');
-          fileItem.className = 'file-item';
-          const jpgName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
-          fileItem.textContent = `${jpgName} (${formatFileSize(fileInfo.file.size)})`;
-          fileList.appendChild(fileItem);
-        });
+        // Show original path and output name
+        fileItem.innerHTML = `
+          <div><small>Original: ${fileInfo.path ? fileInfo.path + '/' : ''}${fileInfo.file.name}</small></div>
+          <div>Output: ${outputName} (${formatFileSize(fileInfo.file.size)})</div>
+        `;
+        fileList.appendChild(fileItem);
       });
     }
     
@@ -462,17 +448,25 @@
               quality: 0.9
             });
             
-            // Get file name without extension and add jpg extension
-            const fileName = fileInfo.file.name.replace(/\.heic$/i, '') + '.jpg';
+            // Add files directly to the root of the ZIP with just their names
+            // Extract just the filename without any path
+            const originalFilename = fileInfo.file.name;
             
-            // Use the path directly without any extra processing
-            // This should already have the root folder name removed
-            const outputPath = fileInfo.path ? 
-              fileInfo.path + '/' + fileName : 
-              fileName;
+            // If there are multiple files with the same name in different folders,
+            // prefix them with part of their path to avoid overwriting
+            let uniqueFilename = originalFilename;
+            if (fileInfo.path) {
+              // Create a simplified path for filename uniqueness
+              const pathParts = fileInfo.path.split('/');
+              const lastFolder = pathParts[pathParts.length - 1];
+              uniqueFilename = lastFolder + '_' + originalFilename;
+            }
             
-            // Add to zip
-            zip.file(outputPath, jpegBlob);
+            // Replace HEIC extension with JPG
+            const jpgFilename = uniqueFilename.replace(/\.heic$/i, '.jpg');
+            
+            // Add to zip without any folder structure
+            zip.file(jpgFilename, jpegBlob);
           } catch (err) {
             console.error(`Error converting ${fileInfo.file.name}:`, err);
             // Continue with other files
