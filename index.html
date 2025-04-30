@@ -3,150 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>T.W. FRIERSON Mileage Reimbursement Processor</title>
-  
-  <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Load libraries directly from CDNs -->
-  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <title>T.W. FRIERSON HEIC Converter</title>
   
   <style>
-    /* T.W. Frierson brand colors */
     :root {
-      --black: #333333; /* 4AM */
-      --yellow: #EBC42E; /* HARD HAT */
-      --blue: #30526E; /* BLUE COLLAR */
-      --brick: #BA6E4D; /* BRICK */
-      --concrete: #D1CCC7; /* CONCRETE */
-      --white: #FAF7F5; /* REFLECTOR */
+      /* T.W. Frierson brand colors from the guide */
+      --4am: #333333; /* Black/4AM */
+      --hardhat: #EBC42E; /* Yellow/HARDHAT */
+      --blue-collar: #30526E; /* Blue/BLUE COLLAR */
+      --brick: #BA6E4D; /* Brick color */
+      --concrete: #D1CCC7; /* Concrete color */
+      --reflector: #FAF7F5; /* White/REFLECTOR */
       
-      /* Dark mode variants */
+      /* Dark mode adaptations of the brand colors */
       --dark-bg: #1F1F1F;
       --darker-bg: #151515;
       --lighter-bg: #2A2A2A;
       --border-color: #444444;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      --text-color: var(--reflector);
+      --text-secondary: #BBBBBB;
     }
     
     body {
-      font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: var(--white);
-      color: var(--black);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    header {
-      background-color: var(--black);
-      color: white;
-      padding: 1.5rem 0;
-    }
-    
-    .container {
-      width: 90%;
-      max-width: 1200px;
+      font-family: 'Franklin Gothic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+      max-width: 850px;
       margin: 0 auto;
-    }
-    
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo-container {
-      display: flex;
-      align-items: center;
-    }
-    
-    .logo-icon {
-      background-color: var(--yellow);
-      width: 40px;
-      height: 40px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-    }
-    
-    .company-name {
-      font-family: 'Bitter', Georgia, serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    
-    .company-title {
-      font-size: 0.9rem;
-      font-weight: 400;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
-    main {
-      flex: 1;
-      padding: 3rem 0;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Bitter', Georgia, serif;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--black);
+      padding: 30px;
+      color: var(--text-color);
+      line-height: 1.6;
+      background-color: var(--darker-bg);
     }
     
     h1 {
-      font-size: 2.2rem;
       text-align: center;
-      color: var(--yellow);
+      margin-bottom: 10px;
+      color: var(--hardhat);
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
     }
     
-    h2.tagline {
-      font-size: 1.2rem;
+    .tagline {
       text-align: center;
       color: var(--concrete);
-      margin-bottom: 2rem;
+      margin-bottom: 30px;
+      font-size: 18px;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     
-    .intro-text {
-      text-align: center;
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
-    }
-    
-    /* Training section / Instructions */
     .training-box {
-      margin-bottom: 2.5rem;
+      margin-bottom: 30px;
       border: 1px solid var(--border-color);
       border-radius: 4px;
       overflow: hidden;
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
     
     .training-header {
-      background-color: var(--blue);
-      color: white;
-      padding: 1rem 1.5rem;
+      background-color: var(--blue-collar);
+      color: var(--reflector);
+      padding: 12px 15px;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -154,7 +71,6 @@
       font-weight: 600;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      transition: background-color 0.2s ease;
     }
     
     .training-header:hover {
@@ -165,35 +81,35 @@
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease-out;
-      padding: 0 1.5rem;
+      background-color: var(--dark-bg);
+      padding: 0 15px;
     }
     
     .training-content.show {
       max-height: 2000px;
-      padding: 1.5rem;
+      padding: 15px;
       transition: max-height 0.5s ease-in, padding 0.3s linear;
     }
     
     .training-content h4 {
-      color: var(--blue);
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
+      color: var(--hardhat);
+      margin-top: 20px;
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-size: 1.1rem;
     }
     
     .training-content h4:first-child {
       margin-top: 0;
     }
     
-    .training-content ol, .training-content ul {
-      margin-left: 1.5rem;
+    .training-content ol {
+      margin-left: 20px;
       padding-left: 0;
     }
     
     .training-content li {
-      margin-bottom: 0.75rem;
+      margin-bottom: 12px;
     }
     
     .training-content li:last-child {
@@ -202,400 +118,194 @@
     
     .training-content p {
       margin-top: 0;
-      margin-bottom: 1rem;
+      margin-bottom: 12px;
     }
     
     .training-content .note {
       background-color: rgba(235, 196, 46, 0.1);
-      border-left: 3px solid var(--yellow);
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
+      border-left: 3px solid var(--hardhat);
+      padding: 10px 15px;
+      margin: 15px 0;
     }
     
-    /* Main app container */
-    .app-container {
-      background-color: white;
+    .container {
+      background-color: var(--dark-bg);
       border-radius: 6px;
-      padding: 2.5rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e0e0e0;
-      margin-bottom: 2.5rem;
+      padding: 35px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
     }
     
-    /* File drop zone */
     .drop-area {
-      border: 4px dashed var(--yellow);
-      border-radius: 8px;
-      padding: 2.5rem;
-      margin-bottom: 2.5rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      background-color: rgba(235, 196, 46, 0.05);
-      position: relative;
-    }
-    
-    .drop-area:hover, .drop-area.active {
-      background-color: rgba(235, 196, 46, 0.1);
-    }
-    
-    .drop-area.has-files {
-      border-color: #27ae60; /* Green for success */
-      background-color: rgba(39, 174, 96, 0.05);
-    }
-    
-    .icon-container {
-      margin-bottom: 1.5rem;
-    }
-    
-    .files-selected {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--black);
-    }
-    
-    .dropzone-instructions {
-      margin-bottom: 1.5rem;
-      color: #666;
-    }
-    
-    /* Buttons */
-    .button-group {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.5rem;
+      border: 2px dashed var(--hardhat);
       border-radius: 6px;
-      font-weight: 600;
-      font-size: 1rem;
+      padding: 40px 25px;
+      text-align: center;
+      margin-bottom: 25px;
+      background-color: var(--lighter-bg);
       cursor: pointer;
       transition: all 0.3s ease;
+    }
+    
+    .drop-area:hover {
+      background-color: #252525;
+      border-color: var(--hardhat);
+    }
+    
+    .drop-area.highlight {
+      background-color: #222222;
+      border-color: var(--hardhat);
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .file-input,
+    .folder-input {
+      display: none;
+    }
+    
+    .upload-button {
+      background-color: var(--hardhat);
+      color: var(--4am);
       border: none;
-      outline: none;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+    }
+    
+    .upload-button:hover {
+      background-color: #D9B52A;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    .convert-button {
+      display: block;
+      background-color: var(--blue-collar);
+      color: var(--reflector);
+      border: none;
+      padding: 14px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 25px auto;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      max-width: 250px;
+      width: 100%;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     
-    .btn-primary {
-      background-color: var(--blue);
-      color: white;
-    }
-    
-    .btn-primary:hover {
+    .convert-button:hover {
       background-color: #3A6082;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
     }
     
-    .btn-primary:disabled {
-      background-color: #30526E80;
+    .convert-button:disabled {
+      background-color: #444444;
+      color: #999999;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
     
-    .btn-secondary {
-      background-color: var(--yellow);
-      color: var(--black);
-    }
-    
-    .btn-secondary:hover {
-      background-color: #d9b32a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-export {
-      background-color: var(--black);
-      color: white;
-      margin-left: 1rem;
-    }
-    
-    .btn-export:hover {
-      background-color: #484848;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .file-input {
+    .progress-container {
+      margin-top: 25px;
       display: none;
     }
     
-    /* Error message */
-    .error-container {
-      background-color: #ffebee;
-      border-left: 5px solid #f44336;
-      color: #d32f2f;
-      padding: 1rem 1.5rem;
-      border-radius: 4px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .error-icon {
-      margin-right: 1rem;
-      flex-shrink: 0;
-    }
-    
-    /* Results container */
-    .results-container {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    .progress-bar {
+      height: 10px;
+      background-color: #333333;
+      border-radius: 5px;
+      margin-bottom: 12px;
       overflow: hidden;
-      margin-bottom: 2.5rem;
     }
     
-    .results-header {
-      padding: 1.5rem 2rem;
-      background-color: var(--concrete);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
+    .progress {
+      height: 100%;
+      background-color: var(--hardhat);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 5px;
     }
     
-    .results-title {
-      margin: 0;
-      font-size: 1.5rem;
+    .status {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
     }
     
-    .results-subtitle {
-      color: var(--blue);
+    .file-list {
+      margin-top: 25px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+      background-color: var(--dark-bg);
+    }
+    
+    .folder-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
       font-weight: 600;
-      margin-top: 0.25rem;
-    }
-    
-    /* Tables */
-    .table-responsive {
-      overflow-x: auto;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    thead {
-      background-color: var(--concrete);
-      border-bottom: 2px solid #999;
-    }
-    
-    th {
-      text-align: left;
-      padding: 1rem 1.5rem;
-      font-family: 'Bitter', serif;
-      font-weight: 600;
-      color: var(--black);
+      color: var(--hardhat);
       text-transform: uppercase;
-      font-size: 0.875rem;
-      letter-spacing: 0.05rem;
+      letter-spacing: 0.5px;
     }
     
-    td {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e0e0e0;
-      vertical-align: middle;
+    .file-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
     }
     
-    tbody tr:hover {
-      background-color: rgba(209, 204, 199, 0.1);
+    .file-item:hover {
+      background-color: #2A2A2A;
     }
     
-    .employee-name {
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: var(--black);
-    }
-    
-    .file-name {
-      font-size: 0.85rem;
-      color: #777;
-      margin-top: 0.25rem;
-    }
-    
-    /* Status badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    
-    .badge-valid {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    
-    .badge-error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    
-    .icon-sm {
-      margin-right: 0.35rem;
-    }
-    
-    /* Toggle buttons */
-    .view-toggle {
-      background: none;
-      border: none;
-      color: var(--blue);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      transition: color 0.3s;
-    }
-    
-    .view-toggle:hover {
-      color: var(--black);
-    }
-    
-    .toggle-icon {
-      margin-left: 0.5rem;
-    }
-    
-    /* Details row */
-    .details-row {
-      background-color: #f8f8f8;
-    }
-    
-    .details-content {
-      padding: 1.5rem 2rem;
-    }
-    
-    .details-title {
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .details-table th,
-    .details-table td {
-      padding: 0.75rem 1rem;
-      font-size: 0.9rem;
-    }
-    
-    .details-table tr:last-child td {
+    .file-item:last-child {
       border-bottom: none;
     }
     
-    .total-row {
-      background-color: var(--concrete);
-      font-weight: 700;
-    }
-    
-    .error-text {
-      color: #dc3545;
-      font-size: 0.85rem;
-      margin-left: 0.5rem;
-    }
-    
-    /* Footer */
-    footer {
-      background-color: var(--black);
-      color: white;
-      padding: 2rem 0;
-      text-align: center;
-      margin-top: auto;
-    }
-    
-    .footer-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .footer-icon {
-      width: 36px;
-      height: 36px;
-      background-color: var(--yellow);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 1rem;
-    }
-    
-    .footer-name {
+    .folder-name {
       font-weight: 600;
-      letter-spacing: 0.05rem;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      color: var(--hardhat);
+      font-size: 16px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
-    .footer-message {
-      color: #aaa;
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid var(--concrete);
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    
-    .loading-text {
-      color: white;
-      margin-top: 1rem;
-      font-size: 1.2rem;
-    }
-    
-    /* Security notice */
     .security-notice {
-      margin-top: 2rem;
+      margin-top: 30px;
       background-color: rgba(186, 110, 77, 0.15);
       border-radius: 4px;
-      padding: 1.5rem 2rem;
+      padding: 15px 20px;
       border-left: 4px solid var(--brick);
     }
     
     .security-notice h3 {
       margin-top: 0;
-      margin-bottom: 0.5rem;
+      margin-bottom: 8px;
       color: var(--brick);
       font-weight: 600;
       text-transform: uppercase;
@@ -604,8 +314,8 @@
     
     .security-notice p {
       margin: 0;
-      color: #666;
-      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-size: 14px;
     }
     
     /* Scrollbar styling */
@@ -614,270 +324,621 @@
     }
     
     ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: var(--darker-bg);
       border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-      background: #bbb;
+      background: var(--border-color);
       border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-      background: #999;
+      background: #555555;
     }
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+      body {
+        padding: 15px;
       }
       
-      .company-title {
-        margin-top: 0.5rem;
+      .container {
+        padding: 20px;
       }
       
-      .app-container, .drop-area {
-        padding: 1.5rem;
+      .drop-area {
+        padding: 30px 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
       }
       
-      .results-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
+      .tagline {
+        font-size: 14px;
       }
       
-      .button-group {
-        flex-direction: column;
-        align-items: center;
+      .upload-button, .convert-button {
+        padding: 10px 16px;
+        font-size: 14px;
       }
       
-      .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
+      .convert-button {
+        max-width: 220px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+  <h1>T.W. FRIERSON</h1>
+  <h2 class="tagline">HEIC TO JPG CONVERSION TOOL</h2>
   
-  <script type="text/babel">
-    // Icon Components
-    const FileIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-    );
-    
-    const CheckIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-    );
-    
-    const AlertIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-    );
-    
-    const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    );
-    
-    const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="18 15 12 9 6 15"></polyline>
-      </svg>
-    );
-    
-    const DownloadIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-    );
-    
-    const HelmetIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
-        <path d="M8 12h8"></path>
-        <path d="M9 17v-5"></path>
-        <path d="M15 17v-5"></path>
-      </svg>
-    );
-    
-    // Helper function to format Excel serial date
-    const formatExcelDate = (serialDate) => {
-      if (!serialDate) return '';
+  <div class="training-box">
+    <div class="training-header" onclick="toggleTraining()">
+      <span>How to Use This Tool</span>
+      <span id="training-arrow">▼</span>
+    </div>
+    <div id="training-content" class="training-content">
+      <h4>What is this tool for?</h4>
+      <p>This tool converts HEIC image files (commonly used by iPhones) to JPG format. The conversion happens entirely on your computer - no files are uploaded to the internet.</p>
       
-      // Check if it's already a formatted date string
-      if (typeof serialDate === 'string' && 
-          (serialDate.includes('/') || serialDate.includes('-'))) {
-        return serialDate;
-      }
+      <h4>Step-by-Step Instructions</h4>
+      <ol>
+        <li><strong>Select your files:</strong> You have two options:
+          <ul>
+            <li><strong>Select individual files:</strong> Click the "Select Files" button and choose one or more HEIC files.</li>
+            <li><strong>Select an entire folder:</strong> Click the "Select Folder" button and choose a folder containing HEIC files.</li>
+          </ul>
+        </li>
+        <li><strong>Review your selection:</strong> You'll see a list of the files you've selected. You can remove any files by clicking the "✕" button next to them.</li>
+        <li><strong>Convert the files:</strong> Click the "Convert to JPG" button. The conversion process will begin.</li>
+        <li><strong>Wait for conversion:</strong> A progress bar will show you the status of the conversion.</li>
+        <li><strong>Find your converted files:</strong> Open your Downloads folder to find the ZIP file.</li>
+        <li><strong>Extract the ZIP file:</strong> 
+          <ul>
+            <li>On Windows: Right-click the ZIP file and select "Extract All". Choose a destination folder or use the default, then click "Extract".</li>
+            <li>On Mac: Double-click the ZIP file and it will automatically extract to the same location.</li>
+            <li>On mobile devices: You may need a file management app that supports ZIP extraction.</li>
+          </ul>
+        </li>
+        <li><strong>Replace your original folder:</strong> You can now safely replace your original folder with the converted folder, as it contains all your original files plus the converted HEIC images.</li>
+      </ol>
       
-      try {
-        // Parse the Excel serial date
-        const excelEpoch = new Date(1900, 0, 1);
-        const daysSinceEpoch = serialDate - 1; // Adjust for Excel's start date
-        const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
-        const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
-        
-        // Format date as MM/DD/YYYY
-        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-      } catch (e) {
-        console.error("Error formatting date:", e);
-        return String(serialDate); // Return original value if parsing fails
+      <h4>Tips for Success</h4>
+      <div class="note">
+        <p><strong>Note:</strong> If you're working with a large number of files, the conversion might take a few minutes. Please be patient and don't close the browser window during conversion.</p>
+        <p>For folders with many non-HEIC files, the tool will preserve all original files in their original locations and only convert the HEIC images to JPG format. Common system files like thumbs.db and .DS_Store will be automatically excluded.</p>
+      </div>
+      
+      <h4>Troubleshooting</h4>
+      <ol>
+        <li><strong>No files appear after selection:</strong> Make sure you're selecting HEIC files. Other image formats won't be recognized.</li>
+        <li><strong>The "Convert to JPG" button is grayed out:</strong> You need to select at least one HEIC file before conversion.</li>
+        <li><strong>Download doesn't start:</strong> If your ZIP file doesn't download automatically, try the conversion again with fewer files at once.</li>
+      </ol>
+      
+      <h4>Need More Help?</h4>
+      <p>If you encounter any issues or have questions about using this tool, please contact Joseph Winters. He developed this tool for T.W. Frierson and can help resolve any problems you might experience.</p>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div id="drop-area" class="drop-area">
+      <p>Drag & drop HEIC files or a folder containing HEIC files here</p>
+      <div class="button-group">
+        <input type="file" id="file-input" class="file-input" accept=".heic,.HEIC" multiple>
+        <input type="file" id="folder-input" class="folder-input" webkitdirectory directory multiple>
+        <button class="upload-button" onclick="document.getElementById('file-input').click()">Select Files</button>
+        <button class="upload-button" onclick="document.getElementById('folder-input').click()">Select Folder</button>
+      </div>
+    </div>
+    
+    <div id="file-list" class="file-list" style="display: none;"></div>
+    
+    <button id="convert-btn" class="convert-button" disabled>Convert to JPG</button>
+    
+    <div id="progress-container" class="progress-container">
+      <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+      </div>
+      <div id="status" class="status">Processing files...</div>
+    </div>
+    
+    <div class="security-notice">
+      <h3>No Surprises</h3>
+      <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company documents and images. Your data never leaves your device.</p>
+      <p>Created for T.W. Frierson by Joseph Winters.</p>
+    </div>
+  </div>
+
+  <!-- Load required libraries from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+  <script>
+    // Make the toggle function available in global scope
+    window.toggleTraining = function() {
+      const content = document.getElementById('training-content');
+      const arrow = document.getElementById('training-arrow');
+      if (content && arrow) {
+        content.classList.toggle('show');
+        arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
       }
     };
     
-    function MileageProcessor() {
-      const [files, setFiles] = React.useState([]);
-      const [employees, setEmployees] = React.useState([]);
-      const [loading, setLoading] = React.useState(false);
-      const [error, setError] = React.useState(null);
-      const [mostCommonRate, setMostCommonRate] = React.useState(null);
-      const [expandedEmployee, setExpandedEmployee] = React.useState(null);
-      const [processingComplete, setProcessingComplete] = React.useState(false);
-      const [isDragging, setIsDragging] = React.useState(false);
-      const [showInstructions, setShowInstructions] = React.useState(false);
+    // Make removeFile accessible in the global scope
+    window.removeFile = function(fileId) {
+      if (window.filesList) {
+        window.filesList = window.filesList.filter(file => file.id !== fileId);
+        updateFileList();
+        document.getElementById('convert-btn').disabled = window.filesList.length === 0;
+      }
+    };
+    
+    // Wait until the DOM is fully loaded before initializing
+    document.addEventListener('DOMContentLoaded', function() {
+      // Files storage - using window object to ensure global scope
+      window.filesList = [];
+      window.sourceName = "";
       
-      // Toggle instructions
-      const toggleInstructions = () => {
-        setShowInstructions(!showInstructions);
-      };
+      // Elements
+      const dropArea = document.getElementById('drop-area');
+      const fileInput = document.getElementById('file-input');
+      const folderInput = document.getElementById('folder-input');
+      const fileList = document.getElementById('file-list');
+      const convertBtn = document.getElementById('convert-btn');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress');
+      const statusText = document.getElementById('status');
       
-      // Handle file drop
-      const handleDrop = (e) => {
+      // Helper function to detect system files
+      function isSystemFile(filename) {
+        if (!filename) return false;
+        const lowerName = filename.toLowerCase();
+        return lowerName === 'thumbs.db' || 
+               lowerName === 'desktop.ini' || 
+               lowerName === '.ds_store' ||
+               lowerName.startsWith('~$') ||  // Temporary Office files
+               lowerName.startsWith('._');    // macOS resource fork files
+      }
+      
+      // -------- Event listeners --------
+      
+      // Prevent default drag behaviors
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      // Highlight drop area when item is dragged over it
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      // Handle dropped files/folders
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      // Handle selected files
+      fileInput.addEventListener('change', handleFiles, false);
+      
+      // Handle selected folders
+      folderInput.addEventListener('change', handleFolder, false);
+      
+      // Convert button event
+      convertBtn.addEventListener('click', convertFiles, false);
+      
+      // -------- Utility functions --------
+      
+      function preventDefaults(e) {
         e.preventDefault();
-        setError(null);
-        setIsDragging(false);
+        e.stopPropagation();
+      }
+      
+      function highlight() {
+        dropArea.classList.add('highlight');
+      }
+      
+      function unhighlight() {
+        dropArea.classList.remove('highlight');
+      }
+      
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
         
-        const items = e.dataTransfer.items;
-        const droppedFiles = [];
-        let pendingFiles = 0;
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
         
-        // Process all dropped items (files and folders)
-        const processEntry = async (entry) => {
-          if (entry.isFile) {
-            if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
-              pendingFiles++;
-              entry.file(file => {
-                droppedFiles.push(file);
-                pendingFiles--;
-                
-                // When all files are processed
-                if (pendingFiles === 0 && droppedFiles.length > 0) {
-                  setFiles(droppedFiles);
-                }
-              });
-            }
-          } else if (entry.isDirectory) {
-            pendingFiles++;
-            const dirReader = entry.createReader();
-            dirReader.readEntries(entries => {
-              entries.forEach(subEntry => processEntry(subEntry));
-              pendingFiles--;
-            });
-          }
-        };
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+      
+      // -------- File handling functions --------
+      
+      // Handle drag and drop
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
         
-        // If webkitGetAsEntry is available (Chrome, Edge)
-        if (items && items[0]?.webkitGetAsEntry) {
+        // Check for folders first
+        if (dt.items) {
+          const items = dt.items;
           for (let i = 0; i < items.length; i++) {
-            const entry = items[i].webkitGetAsEntry();
-            if (entry) {
-              processEntry(entry);
+            const item = items[i];
+            if (item.kind === 'file' && item.webkitGetAsEntry) {
+              const entry = item.webkitGetAsEntry();
+              if (entry && entry.isDirectory) {
+                processDirectory(entry);
+                return;
+              }
             }
           }
-        } else {
-          // Fallback to regular files
-          const files = e.dataTransfer.files;
-          if (files.length > 0) {
-            const validFiles = Array.from(files).filter(
-              file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-            );
+        }
+        
+        // If no folders, process as regular files
+        const droppedFiles = dt.files;
+        // Check if we have any files to process
+        if (droppedFiles && droppedFiles.length > 0) {
+          // If files, just handle HEIC files
+          handleFiles({ target: { files: droppedFiles } });
+        }
+      }
+      
+      // Process individual files
+      function handleFiles(e) {
+        const inputFiles = e.target.files;
+        
+        if (!inputFiles || inputFiles.length === 0) {
+          return;
+        }
+        
+        // Filter only HEIC files
+        const heicFiles = Array.from(inputFiles).filter(file => 
+          file.name && file.name.toLowerCase().endsWith('.heic')
+        );
+        
+        if (heicFiles.length === 0) {
+          alert('Please select HEIC files only.');
+          return;
+        }
+        
+        // Store files with metadata
+        window.sourceName = "Selected Files";
+        window.filesList = heicFiles.map(file => {
+          return {
+            file: file,
+            path: "", // No path for individual files
+            fullPath: file.name,
+            isHeic: true, // All files here are HEIC
+            // Generate a unique ID for this file
+            id: Math.random().toString(36).substring(2, 11)
+          };
+        });
+        
+        updateFileList();
+        
+        // Enable convert button
+        convertBtn.disabled = window.filesList.length === 0;
+      }
+      
+      // Process folder selection
+      function handleFolder(e) {
+        const inputFiles = e.target.files;
+        
+        if (!inputFiles || inputFiles.length === 0) {
+          return;
+        }
+        
+        // Get folder name from the path of the first file
+        const pathParts = inputFiles[0].webkitRelativePath.split('/');
+        window.sourceName = pathParts[0];
+        
+        // Store ALL files with their relative paths (not just HEIC files)
+        // But exclude system files like thumbs.db
+        window.filesList = Array.from(inputFiles)
+          .filter(file => file && file.name && !isSystemFile(file.name))
+          .map(file => {
+            // Get the path excluding the root folder and filename
+            const fullPath = file.webkitRelativePath;
+            const pathParts = fullPath.split('/');
+            pathParts.shift(); // Remove the root folder name
             
-            if (validFiles.length > 0) {
-              setFiles(validFiles);
-            } else {
-              setError("No Excel files found. Please upload .xlsx or .xls files.");
-            }
-          }
-        }
-      };
-      
-      // Handle file selection via input
-      const handleFileSelect = (e) => {
-        setError(null);
+            // If there's just one part left, it's a file directly in the root
+            const relativePath = pathParts.length > 1 ? 
+              pathParts.slice(0, -1).join('/') : 
+              '';
+            
+            return {
+              file: file,
+              path: relativePath,
+              fullPath: pathParts.join('/'), // This no longer includes the root folder
+              isHeic: file.name.toLowerCase().endsWith('.heic'),
+              // Generate a unique ID for this file
+              id: Math.random().toString(36).substring(2, 11)
+            };
+          });
         
-        const selectedFiles = e.target.files;
-        if (selectedFiles.length > 0) {
-          const validFiles = Array.from(selectedFiles).filter(
-            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-          );
-          
-          if (validFiles.length > 0) {
-            setFiles(validFiles);
-          } else {
-            setError("No Excel files found. Please select .xlsx or .xls files.");
-          }
-        }
-      };
-      
-      // Process files
-      const processFiles = async () => {
-        if (files.length === 0) return;
+        // Check if we have any HEIC files
+        const hasHeicFiles = window.filesList.some(fileInfo => fileInfo.isHeic);
         
-        setLoading(true);
-        setError(null);
-        setProcessingComplete(false);
-        setEmployees([]);
+        if (!hasHeicFiles) {
+          alert('No HEIC files found in the selected folder. All other files will still be included in the output.');
+        }
+        
+        updateFileList();
+        
+        // Enable convert button if we have any files
+        convertBtn.disabled = window.filesList.length === 0;
+      }
+      
+      // Process directories (for drag & drop)
+      async function processDirectory(directoryEntry) {
+        window.sourceName = directoryEntry.name;
+        window.filesList = [];
         
         try {
-          const processedEmployees = [];
-          const ratesCount = {};
+          const entries = await readDirectoryEntries(directoryEntry);
+          const allFiles = await processAllEntries(entries, "");
           
-          for (const file of files) {
+          // Check if there are any HEIC files
+          const hasHeicFiles = allFiles.some(fileInfo => fileInfo.isHeic);
+          
+          if (!hasHeicFiles) {
+            alert('No HEIC files found in the folder. All other files will still be included in the output.');
+          }
+          
+          window.filesList = allFiles;
+          updateFileList();
+          
+          // Enable convert button if we have any files
+          convertBtn.disabled = window.filesList.length === 0;
+        } catch (error) {
+          console.error("Error processing directory:", error);
+          alert('Error reading folder: ' + error.message);
+        }
+      }
+      
+      // Read all entries in a directory recursively
+      async function readDirectoryEntries(directoryEntry) {
+        const directoryReader = directoryEntry.createReader();
+        let entries = [];
+        let readEntries = await readEntriesBatch(directoryReader);
+        
+        while (readEntries.length > 0) {
+          entries = entries.concat(readEntries);
+          readEntries = await readEntriesBatch(directoryReader);
+        }
+        
+        return entries;
+      }
+      
+      // Read a batch of entries from a directory reader
+      function readEntriesBatch(directoryReader) {
+        return new Promise((resolve, reject) => {
+          directoryReader.readEntries(resolve, reject);
+        });
+      }
+      
+      // Process all entries recursively (including non-HEIC files)
+      async function processAllEntries(entries, path) {
+        const results = [];
+        
+        for (const entry of entries) {
+          if (entry && entry.isFile) {
             try {
-              const arrayBuffer = await file.arrayBuffer();
-              const workbook = XLSX.read(arrayBuffer, {
-                type: 'array',
-                cellDates: true
-              });
+              // Skip system files
+              if (entry.name && isSystemFile(entry.name)) {
+                continue;
+              }
               
-              const firstSheetName = workbook.SheetNames[0];
-              const worksheet = workbook.Sheets[firstSheetName];
+              const file = await getFileFromEntry(entry);
+              if (file) {
+                results.push({
+                  file: file,
+                  path: path, // Path without the root folder name
+                  fullPath: path ? path + '/' + file.name : file.name,
+                  isHeic: file.name.toLowerCase().endsWith('.heic'),
+                  id: Math.random().toString(36).substring(2, 11)
+                });
+              }
+            } catch (error) {
+              console.error(`Error getting file ${entry.name}:`, error);
+            }
+          } else if (entry && entry.isDirectory) {
+            try {
+              const subEntries = await readDirectoryEntries(entry);
+              const newPath = path ? path + '/' + entry.name : entry.name;
+              const subFiles = await processAllEntries(subEntries, newPath);
+              results.push(...subFiles);
+            } catch (error) {
+              console.error(`Error processing directory ${entry.name}:`, error);
+            }
+          }
+        }
+        
+        return results;
+      }
+      
+      // Get file from FileEntry
+      function getFileFromEntry(fileEntry) {
+        return new Promise((resolve, reject) => {
+          fileEntry.file(resolve, reject);
+        });
+      }
+      
+      // Update the file list display
+      function updateFileList() {
+        if (window.filesList.length === 0) {
+          fileList.style.display = 'none';
+          return;
+        }
+        
+        fileList.style.display = 'block';
+        fileList.innerHTML = '';
+        
+        const titleElement = document.createElement('div');
+        titleElement.className = 'folder-name';
+        titleElement.textContent = window.sourceName;
+        fileList.appendChild(titleElement);
+        
+        // Note about output structure
+        const outputNote = document.createElement('div');
+        outputNote.style.margin = '10px 0';
+        outputNote.style.fontSize = '14px';
+        outputNote.style.color = '#BBBBBB';
+        outputNote.textContent = 'All files from the folder will be kept, with HEIC files converted to JPG:';
+        fileList.appendChild(outputNote);
+        
+        // Group files by path
+        const pathGroups = {};
+        window.filesList.forEach(fileInfo => {
+          const path = fileInfo.path || '(root)';
+          if (!pathGroups[path]) {
+            pathGroups[path] = [];
+          }
+          pathGroups[path].push(fileInfo);
+        });
+        
+        // Display files grouped by path
+        Object.keys(pathGroups).sort().forEach(path => {
+          // Add path header if not root
+          if (path !== '(root)') {
+            const pathHeader = document.createElement('div');
+            pathHeader.className = 'folder-item';
+            pathHeader.textContent = `/${path}`;
+            fileList.appendChild(pathHeader);
+          }
+          
+          // Display files in this path
+          pathGroups[path].forEach(fileInfo => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            // Format differently based on file type
+            if (fileInfo.isHeic) {
+              // Show conversion for HEIC files
+              let outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
               
-              // Get employee data
-              const employeeName = worksheet['B2']?.v || 'Unknown';
-              const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
-              const irsRate = parseFloat(worksheet['B4']?.v) || 0;
-              const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
-              
-              // Count IRS rates for consensus
-              ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
-              
-              // Get individual entries
-              const entries = [];
-              let rowIndex = 7;
-              let entryTotalMiles = 0;
-              
-              while (worksheet[`A${rowIndex}`]) {
-                const date = worksheet[`A${rowIndex}`]?.v || '';
-                const purpose = worksheet[`B${rowIndex}`]?.v || '';
-                const description = worksheet[`C${rowIndex}`]?.v || '';
-                const miles = parseFloat(worksheet[`D${rowIndex}`]
+              fileItem.innerHTML = `
+                <div><small>${fileInfo.file.name} (HEIC)</small></div>
+                <div>→ ${outputName} (${formatFileSize(fileInfo.file.size)})
+                  <span style="float: right; cursor: pointer; color: #BA6E4D;" 
+                        onclick="removeFile('${fileInfo.id}')">✕</span>
+                </div>
+              `;
+            } else {
+              // Just show the file for non-HEIC
+              fileItem.innerHTML = `
+                <div>${fileInfo.file.name} (${formatFileSize(fileInfo.file.size)})
+                  <span style="float: right; cursor: pointer; color: #BA6E4D;" 
+                        onclick="removeFile('${fileInfo.id}')">✕</span>
+                </div>
+              `;
+            }
+            
+            fileList.appendChild(fileItem);
+          });
+        });
+      }
+      
+      // Convert files to JPG and create a ZIP
+      async function convertFiles() {
+        if (window.filesList.length === 0) return;
+        
+        // Show progress
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        statusText.textContent = 'Preparing to convert...';
+        convertBtn.disabled = true;
+        
+        try {
+          // Create a new JSZip instance
+          const zip = new JSZip();
+          
+          // Set appropriate name for the ZIP
+          let zipName = 'converted_images.zip';
+          if (window.sourceName && window.sourceName !== "Selected Files") {
+            zipName = `${window.sourceName}_converted.zip`;
+          }
+          
+          // Process each file
+          let processed = 0;
+          let totalFiles = window.filesList.length;
+          
+          for (const fileInfo of window.filesList) {
+            // Update status
+            processed++;
+            statusText.textContent = `Processing ${processed} of ${totalFiles}: ${fileInfo.file.name}`;
+            progressBar.style.width = `${(processed / totalFiles) * 90}%`;
+            
+            try {
+              if (fileInfo.isHeic) {
+                // Convert HEIC to JPEG
+                statusText.textContent = `Converting ${fileInfo.file.name} to JPG...`;
+                const jpegBlob = await heic2any({
+                  blob: fileInfo.file,
+                  toType: 'image/jpeg',
+                  quality: 0.9
+                });
+                
+                // Get file name without extension and add jpg extension
+                const outputName = fileInfo.file.name.replace(/\.heic$/i, '.jpg');
+                
+                // Add to zip in the correct path
+                const filePath = fileInfo.path ? fileInfo.path + '/' + outputName : outputName;
+                zip.file(filePath, jpegBlob);
+              } else {
+                // For non-HEIC files, just add them to the zip as-is
+                statusText.textContent = `Adding ${fileInfo.file.name} to archive...`;
+                const filePath = fileInfo.path ? fileInfo.path + '/' + fileInfo.file.name : fileInfo.file.name;
+                zip.file(filePath, fileInfo.file);
+              }
+            } catch (err) {
+              console.error(`Error processing ${fileInfo.file.name}:`, err);
+              statusText.textContent = `Error with ${fileInfo.file.name}: ${err.message || 'Processing failed'}`;
+              await new Promise(resolve => setTimeout(resolve, 1500)); // Show error briefly before continuing
+            }
+          }
+          
+          // Update status
+          statusText.textContent = 'Creating ZIP file...';
+          progressBar.style.width = '90%';
+          
+          // Generate the ZIP file
+          const zipBlob = await zip.generateAsync({ 
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+          }, (metadata) => {
+            progressBar.style.width = `${90 + metadata.percent / 10}%`;
+          });
+          
+          // Save the ZIP file using FileSaver.js
+          saveAs(zipBlob, zipName);
+          
+          // Update status
+          statusText.textContent = 'Conversion completed!';
+          progressBar.style.width = '100%';
+          
+          // Reset after a delay
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+            convertBtn.disabled = false;
+          }, 3000);
+          
+        } catch (error) {
+          console.error('Conversion error:', error);
+          statusText.textContent = `Error: ${error.message || 'Failed to process files'}`;
+          convertBtn.disabled = false;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
